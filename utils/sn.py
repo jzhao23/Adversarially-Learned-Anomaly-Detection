@@ -7,7 +7,7 @@ def conv2d(inputs, filters, kernel_size, strides=1, padding='valid',
            bias_initializer=tf.zeros_initializer(), kernel_regularizer=None,
            name=None,reuse=None):
 
-    with tf.variable_scope(name, reuse=reuse):
+    with tf.compat.v1.variable_scope(name, reuse=reuse):
         w = tf.get_variable("kernel", shape=[kernel_size, kernel_size, inputs.get_shape()[-1], filters], initializer=kernel_initializer,
                             regularizer=kernel_regularizer)
         bias = tf.get_variable("bias", [filters], initializer=bias_initializer)
@@ -22,7 +22,7 @@ def dense(inputs, units, use_bias=True, kernel_initializer=None,
           bias_initializer=tf.zeros_initializer(), kernel_regularizer=None,
           name=None,reuse=None):
 
-    with tf.variable_scope(name, reuse=reuse):
+    with tf.compat.v1.variable_scope(name, reuse=reuse):
         inputs = tf.contrib.layers.flatten(inputs)
         shape = inputs.get_shape().as_list()
         channels = shape[-1]
