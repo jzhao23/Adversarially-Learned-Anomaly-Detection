@@ -86,12 +86,12 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
     global_step = tf.Variable(0, name='global_step', trainable=False)
 
     # Placeholders
-    x_pl = tf.placeholder(tf.float32, shape=data.get_shape_input(),
+    x_pl = tf.compat.v1.placeholder(tf.float32, shape=data.get_shape_input(),
                           name="input_x")
-    z_pl = tf.placeholder(tf.float32, shape=[None, latent_dim],
+    z_pl = tf.compat.v1.placeholder(tf.float32, shape=[None, latent_dim],
                           name="input_z")
-    is_training_pl = tf.placeholder(tf.bool, [], name='is_training_pl')
-    learning_rate = tf.placeholder(tf.float32, shape=(), name="lr_pl")
+    is_training_pl = tf.compat.v1.placeholder(tf.bool, [], name='is_training_pl')
+    learning_rate = tf.compat.v1.placeholder(tf.float32, shape=(), name="lr_pl")
 
     # Data
     logger.info('Data loading...')
@@ -334,7 +334,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                    tf.summary.scalar('valid', rec_error_valid, ['v'])
 
             with tf.name_scope('img_summary'):
-                heatmap_pl_latent = tf.placeholder(tf.float32,
+                heatmap_pl_latent = tf.compat.v1.placeholder(tf.float32,
                                                    shape=(1, 480, 640, 3),
                                                    name="heatmap_pl_latent")
                 sum_op_latent = tf.summary.image('heatmap_latent', heatmap_pl_latent)
@@ -345,7 +345,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                     tf.summary.image('input_images', x_pl, 8, ['image'])
 
             else:
-                heatmap_pl_rec = tf.placeholder(tf.float32, shape=(1, 480, 640, 3),
+                heatmap_pl_rec = tf.compat.v1.placeholder(tf.float32, shape=(1, 480, 640, 3),
                                             name="heatmap_pl_rec")
                 with tf.name_scope('image_summary'):
                     tf.summary.image('heatmap_rec', heatmap_pl_rec, 1, ['image'])
