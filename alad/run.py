@@ -68,7 +68,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
         enable_early_stop (bool): allow early stopping for determining the number of epochs
         do_spectral_norm (bool): allow spectral norm or not for ablation study
     """
-    config = tf.ConfigProto()
+    config = tf.compat.v1.ConfigProto()
     config.gpu_options.allow_growth = True
     logger = logging.getLogger("ALAD.run.{}.{}".format(
         dataset, label))
@@ -364,7 +364,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
     sv = tf.train.Supervisor(logdir=logdir, save_summaries_secs=None, saver=saver, save_model_secs=save_model_secs) 
 
     logger.info('Start training...')
-    with sv.managed_session(config=config) as sess:
+    with sv.compat.v1.managed_session(config=config) as sess:
 
         step = sess.run(global_step)
         logger.info('Initialization done at step {}'.format(step/nr_batches_train))
