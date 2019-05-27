@@ -562,7 +562,7 @@ def run(args):
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
     with tf.Graph().as_default():
         # Set the graph level seed
-        tf.set_random_seed(args.rd)
+        tf.random.set_seed(args.rd)
         train_and_test(args.dataset, args.nb_epochs, args.d, args.rd, args.label,
                       args.enable_dzz, args.enable_sm, args.m,
                        args.enable_early_stop, args.sn)
