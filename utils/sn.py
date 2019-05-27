@@ -8,9 +8,9 @@ def conv2d(inputs, filters, kernel_size, strides=1, padding='valid',
            name=None,reuse=None):
 
     with tf.compat.v1.variable_scope(name, reuse=reuse):
-        w = tf.get_variable("kernel", shape=[kernel_size, kernel_size, inputs.get_shape()[-1], filters], initializer=kernel_initializer,
+        w = tf.compat.v1.get_variable("kernel", shape=[kernel_size, kernel_size, inputs.get_shape()[-1], filters], initializer=kernel_initializer,
                             regularizer=kernel_regularizer)
-        bias = tf.get_variable("bias", [filters], initializer=bias_initializer)
+        bias = tf.compat.v1.get_variable("bias", [filters], initializer=bias_initializer)
         x = tf.nn.conv2d(input=inputs, filter=spectral_norm(w),
                          strides=[1, strides, strides, 1], padding=padding)
         if use_bias :
@@ -27,10 +27,10 @@ def dense(inputs, units, use_bias=True, kernel_initializer=None,
         shape = inputs.get_shape().as_list()
         channels = shape[-1]
 
-        w = tf.get_variable("kernel", [channels, units], tf.float32,
+        w = tf.compat.v1.get_variable("kernel", [channels, units], tf.float32,
                                  initializer=kernel_initializer, regularizer=kernel_regularizer)
         if use_bias :
-            bias = tf.get_variable("bias", [units],
+            bias = tf.compat.v1.get_variable("bias", [units],
                                    initializer=bias_initializer)
 
             x = tf.matmul(inputs, spectral_norm(w)) + bias
@@ -43,7 +43,7 @@ def spectral_norm(w, iteration=1, eps=1e-12):
     w_shape = w.shape.as_list()
     w = tf.reshape(w, [-1, w_shape[-1]])
 
-    u = tf.get_variable("u", [1, w_shape[-1]], initializer=tf.truncated_normal_initializer(), trainable=False)
+    u = tf.compat.v1.get_variable("u", [1, w_shape[-1]], initializer=tf.truncated_normal_initializer(), trainable=False)
 
     u_hat = u
     v_hat = None
