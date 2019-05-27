@@ -116,19 +116,19 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
     dis_xx = network.discriminator_xx
     dis_zz = network.discriminator_zz
 
-    with tf.variable_scope('encoder_model'):
+    with tf.compat.v1.variable_scope('encoder_model'):
         z_gen = enc(x_pl, is_training=is_training_pl,
                     do_spectral_norm=do_spectral_norm)
 
-    with tf.variable_scope('generator_model'):
+    with tf.compat.v1.variable_scope('generator_model'):
         x_gen = gen(z_pl, is_training=is_training_pl)
         rec_x = gen(z_gen, is_training=is_training_pl, reuse=True)
 
-    with tf.variable_scope('encoder_model'):
+    with tf.compat.v1.variable_scope('encoder_model'):
         rec_z = enc(x_gen, is_training=is_training_pl, reuse=True,
                     do_spectral_norm=do_spectral_norm)
 
-    with tf.variable_scope('discriminator_model_xz'):
+    with tf.compat.v1.variable_scope('discriminator_model_xz'):
         l_encoder, inter_layer_inp_xz = dis_xz(x_pl, z_gen,
                                             is_training=is_training_pl,
                     do_spectral_norm=do_spectral_norm)
@@ -137,14 +137,14 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                                               reuse=True,
                     do_spectral_norm=do_spectral_norm)
 
-    with tf.variable_scope('discriminator_model_xx'):
+    with tf.compat.v1.variable_scope('discriminator_model_xx'):
         x_logit_real, inter_layer_inp_xx = dis_xx(x_pl, x_pl,
                                                   is_training=is_training_pl,
                     do_spectral_norm=do_spectral_norm)
         x_logit_fake, inter_layer_rct_xx = dis_xx(x_pl, rec_x, is_training=is_training_pl,
                               reuse=True, do_spectral_norm=do_spectral_norm)
 
-    with tf.variable_scope('discriminator_model_zz'):
+    with tf.compat.v1.variable_scope('discriminator_model_zz'):
         z_logit_real, _ = dis_zz(z_pl, z_pl, is_training=is_training_pl,
                                  do_spectral_norm=do_spectral_norm)
         z_logit_fake, _ = dis_zz(z_pl, rec_z, is_training=is_training_pl,
@@ -252,18 +252,18 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
         train_dis_op_zz, zz_ema = train_op_with_ema_dependency(dzzvars,
                                                                dis_op_zz)
 
-    with tf.variable_scope('encoder_model'):
+    with tf.compat.v1.variable_scope('encoder_model'):
         z_gen_ema = enc(x_pl, is_training=is_training_pl,
                         getter=get_getter(enc_ema), reuse=True,
                         do_spectral_norm=do_spectral_norm)
 
-    with tf.variable_scope('generator_model'):
+    with tf.compat.v1.variable_scope('generator_model'):
         rec_x_ema = gen(z_gen_ema, is_training=is_training_pl,
                               getter=get_getter(gen_ema), reuse=True)
         x_gen_ema = gen(z_pl, is_training=is_training_pl,
                               getter=get_getter(gen_ema), reuse=True)
 
-    with tf.variable_scope('discriminator_model_xx'):
+    with tf.compat.v1.variable_scope('discriminator_model_xx'):
         l_encoder_emaxx, inter_layer_inp_emaxx = dis_xx(x_pl, x_pl,
                                                     is_training=is_training_pl,
                                                     getter=get_getter(xx_ema),
@@ -279,7 +279,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
 
     with tf.name_scope('Testing'):
 
-        with tf.variable_scope('Scores'):
+        with tf.compat.v1.variable_scope('Scores'):
 
 
             score_ch = tf.nn.sigmoid_cross_entropy_with_logits(
