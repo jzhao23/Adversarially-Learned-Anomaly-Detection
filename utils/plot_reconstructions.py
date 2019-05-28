@@ -1,5 +1,5 @@
 import numpy as np
-from utils.evaluations import save_results_csv
+from .evaluations import save_results_csv
 import time
 import os
 import matplotlib.pyplot as plt
