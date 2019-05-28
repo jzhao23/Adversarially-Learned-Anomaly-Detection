@@ -214,7 +214,7 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
                                  kernel_initializer=init_kernel,
                                  name='conv2')
 
-            x = tf.layers.batch_normalization(x,
+            x = tf.compat.v1.layers.batch_normalization(x,
                                               training=is_training,
                                               name='conv2/batch_normalization')
 
@@ -230,7 +230,7 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
                                  kernel_initializer=init_kernel,
                                  name='conv3')
 
-            x = tf.layers.batch_normalization(x,
+            x = tf.compat.v1.layers.batch_normalization(x,
                                               training=is_training,
                                               name='conv3/batch_normalization')
 
