@@ -69,6 +69,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
         enable_early_stop (bool): allow early stopping for determining the number of epochs
         do_spectral_norm (bool): allow spectral norm or not for ablation study
     """
+    tf.reset_default_graph()
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     logger = logging.getLogger("ALAD.run.{}.{}".format(
