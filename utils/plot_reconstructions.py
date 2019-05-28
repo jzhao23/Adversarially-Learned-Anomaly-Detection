@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 
 def plot_hist_dis_reconstructions():
-    walk_dir = '../results'
+    walk_dir = '../results/alad_snTrue_dzzTrue/svhn/ch/wdzzenabledTrue'
     label = []
     for root, _, files in os.walk(walk_dir):
         for filename in files:
