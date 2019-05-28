@@ -484,7 +484,8 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                 if (valid_loss < best_valid_loss or epoch == FREQ_EV-1):
                     best_valid_loss = valid_loss
                     logger.info("Best model - valid loss = {:.4f} - saving...".format(best_valid_loss))
-                    sv.saver.save(sess, logdir+'/model.ckpt', global_step=step)
+                    # sv.saver.save(sess, logdir+'/model.ckpt', global_step=step) derprecated
+                    global_step = step
                     nb_without_improvements = 0
                 else:
                     nb_without_improvements += FREQ_EV
@@ -498,6 +499,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
             epoch += 1
 
         # sv.saver.save(sess, logdir+'/model.ckpt', global_step=step) deprecated
+        global_step = step
 
         logger.warn('Testing evaluation...')
 
