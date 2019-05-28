@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 
 def plot_hist_dis_reconstructions():
-    walk_dir = '../results/alad_snTrue_dzzTrue/svhn/ch/wdzzenabledTrue' #~/Adversarially-Learned-Anomaly-Detection
+    walk_dir = '../results/results.csv' #~/Adversarially-Learned-Anomaly-Detection #alad_snTrue_dzzTrue/svhn/ch/wdzzenabledTrue/0.csv
     label = []
     for root, _, files in os.walk(walk_dir):
         for filename in files:
