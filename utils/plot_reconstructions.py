@@ -14,6 +14,9 @@ def plot_hist_dis_reconstructions():
             file_path = os.path.join(root, filename)
             print("filepath: ", file_path)
 
+            if file_path.contains(".png"):
+                continue
+
             try:
                 array = np.vstack(
                     [array, np.genfromtxt(file_path, delimiter=',')])
