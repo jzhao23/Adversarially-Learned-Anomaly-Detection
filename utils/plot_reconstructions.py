@@ -17,7 +17,7 @@ def plot_hist_dis_reconstructions():
             try:
                 array = np.vstack(
                     [array, np.genfromtxt(file_path, delimiter=',')])
-            except: #NameError
+            except NameError:
                 array = np.genfromtxt(file_path, delimiter=',')
 
             label += [file_path.split('/')[-3] + '-' + file_path.split('/')[-2]]
