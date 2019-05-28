@@ -10,8 +10,9 @@ def plot_hist_dis_reconstructions():
     label = []
     for root, _, files in os.walk(walk_dir):
         for filename in files:
+            print("filename: ", filename)
             file_path = os.path.join(root, filename)
-            print(file_path)
+            print("filepath: ", file_path)
 
             try:
                 array = np.vstack(
