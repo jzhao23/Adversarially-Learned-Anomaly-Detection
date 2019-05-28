@@ -19,7 +19,7 @@ def conv2d(inputs, filters, kernel_size, strides=1, padding='valid',
     return x
 
 def dense(inputs, units, use_bias=True, kernel_initializer=None,
-          bias_initializer=tf.zeros_initializer(), kernel_regularizer=None,
+          bias_initializer=tf.compat.v1.zeros_initializer(), kernel_regularizer=None,
           name=None,reuse=None):
 
     with tf.compat.v1.variable_scope(name, reuse=reuse):
@@ -43,7 +43,7 @@ def spectral_norm(w, iteration=1, eps=1e-12):
     w_shape = w.shape.as_list()
     w = tf.reshape(w, [-1, w_shape[-1]])
 
-    u = tf.compat.v1.get_variable("u", [1, w_shape[-1]], initializer=tf.truncated_normal_initializer(), trainable=False)
+    u = tf.compat.v1.get_variable("u", [1, w_shape[-1]], initializer=tf.compat.v1.truncated_normal_initializer(), trainable=False)
 
     u_hat = u
     v_hat = None
@@ -61,7 +61,7 @@ def spectral_norm(w, iteration=1, eps=1e-12):
     sigma = tf.matmul(tf.matmul(v_hat, w), tf.transpose(u_hat))
     w_norm = w / sigma
 
-    with tf.control_dependencies([u.assign(u_hat)]):
+    with tf.compat.v1.control_dependencies([u.assign(u_hat)]):
         w_norm = tf.reshape(w_norm, w_shape)
 
     return w_norm
