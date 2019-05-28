@@ -1,31 +1,24 @@
 import numpy as np
-from evaluations import save_results_csv
+from utils.evaluations import save_results_csv
 import time
 import os
 import matplotlib.pyplot as plt
 
 
 def plot_hist_dis_reconstructions():
-    walk_dir = '../results/' #~/Adversarially-Learned-Anomaly-Detection #alad_snTrue_dzzTrue/svhn/ch/wdzzenabledTrue/0.csv
+    walk_dir = 'scores'
     label = []
     for root, _, files in os.walk(walk_dir):
         for filename in files:
-            print("filename: ", filename)
             file_path = os.path.join(root, filename)
-            print("filepath: ", file_path)
 
-            if "png" in file_path:
-                continue
-
-            """try:
+            try:
                 array = np.vstack(
                     [array, np.genfromtxt(file_path, delimiter=',')])
-            except NameError:"""
-            array = np.genfromtxt(file_path, delimiter=',')
+            except NameError:
+                array = np.genfromtxt(file_path, delimiter=',')
 
             label += [file_path.split('/')[-3] + '-' + file_path.split('/')[-2]]
-
-            print("label: ", label)
 
     hrange = (np.min(array), np.max(array))
 
@@ -38,4 +31,3 @@ def plot_hist_dis_reconstructions():
         plt.close()
 
 if __name__ == "__main__":
-    plot_hist_dis_reconstructions()
