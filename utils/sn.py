@@ -11,10 +11,10 @@ def conv2d(inputs, filters, kernel_size, strides=1, padding='valid',
         w = tf.compat.v1.get_variable("kernel", shape=[kernel_size, kernel_size, inputs.get_shape()[-1], filters], initializer=kernel_initializer,
                             regularizer=kernel_regularizer)
         bias = tf.compat.v1.get_variable("bias", [filters], initializer=bias_initializer)
-        x = tf.nn.conv2d(input=inputs, filter=spectral_norm(w),
+        x = tf.compat.v1.nn.conv2d(input=inputs, filter=spectral_norm(w),
                          strides=[1, strides, strides, 1], padding=padding)
         if use_bias :
-            x = tf.nn.bias_add(x, bias)
+            x = tf.compat.v1.nn.bias_add(x, bias)
 
     return x
 
