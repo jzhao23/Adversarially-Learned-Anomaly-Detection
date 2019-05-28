@@ -17,13 +17,15 @@ def plot_hist_dis_reconstructions():
             if "png" in file_path:
                 continue
 
-            try:
+            """try:
                 array = np.vstack(
                     [array, np.genfromtxt(file_path, delimiter=',')])
-            except NameError:
-                array = np.genfromtxt(file_path, delimiter=',')
+            except NameError:"""
+            array = np.genfromtxt(file_path, delimiter=',')
 
             label += [file_path.split('/')[-3] + '-' + file_path.split('/')[-2]]
+
+            print("label: ", label)
 
     hrange = (np.min(array), np.max(array))
 
