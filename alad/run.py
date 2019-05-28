@@ -363,9 +363,9 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
     saver = tf.train.Saver(max_to_keep=2)
     save_model_secs = None if enable_early_stop else 20
     #sv = tf.train.Supervisor(logdir=logdir, save_summaries_secs=None, saver=saver, save_model_secs=save_model_secs)  deprecated!
-    sv = tf.train.MonitoredTrainingSession(checkpoint_dir=logdir)
+    sv = tf.train.MonitoredTrainingSession(checkpoint_dir=logdir, config=config)
     logger.info('Start training...')
-    with sv.compat.v1.managed_session(config=config) as sess:
+    with sv as sess:
 
         step = sess.run(global_step)
         logger.info('Initialization done at step {}'.format(step/nr_batches_train))
