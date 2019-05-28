@@ -1,6 +1,7 @@
 import time
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 #import tf_cnnvis
 import logging
 import importlib
@@ -68,7 +69,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
         enable_early_stop (bool): allow early stopping for determining the number of epochs
         do_spectral_norm (bool): allow spectral norm or not for ablation study
     """
-    config = tf.compat.v1.ConfigProto()
+    config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     logger = logging.getLogger("ALAD.run.{}.{}".format(
         dataset, label))
@@ -83,15 +84,15 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
     latent_dim = network.latent_dim
     ema_decay = 0.999
 
-    global_step = tf.compat.v1.Variable(0, name='global_step', trainable=False)
+    global_step = tf.Variable(0, name='global_step', trainable=False)
 
     # Placeholders
-    x_pl = tf.compat.v1.placeholder(tf.float32, shape=data.get_shape_input(),
+    x_pl = tf.placeholder(tf.float32, shape=data.get_shape_input(),
                           name="input_x")
-    z_pl = tf.compat.v1.placeholder(tf.float32, shape=[None, latent_dim],
+    z_pl = tf.placeholder(tf.float32, shape=[None, latent_dim],
                           name="input_z")
-    is_training_pl = tf.compat.v1.placeholder(tf.bool, [], name='is_training_pl')
-    learning_rate = tf.compat.v1.placeholder(tf.float32, shape=(), name="lr_pl")
+    is_training_pl = tf.placeholder(tf.bool, [], name='is_training_pl')
+    learning_rate = tf.placeholder(tf.float32, shape=(), name="lr_pl")
 
     # Data
     logger.info('Data loading...')
@@ -116,19 +117,19 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
     dis_xx = network.discriminator_xx
     dis_zz = network.discriminator_zz
 
-    with tf.compat.v1.variable_scope('encoder_model'):
+    with tf.variable_scope('encoder_model'):
         z_gen = enc(x_pl, is_training=is_training_pl,
                     do_spectral_norm=do_spectral_norm)
 
-    with tf.compat.v1.variable_scope('generator_model'):
+    with tf.variable_scope('generator_model'):
         x_gen = gen(z_pl, is_training=is_training_pl)
         rec_x = gen(z_gen, is_training=is_training_pl, reuse=True)
 
-    with tf.compat.v1.variable_scope('encoder_model'):
+    with tf.variable_scope('encoder_model'):
         rec_z = enc(x_gen, is_training=is_training_pl, reuse=True,
                     do_spectral_norm=do_spectral_norm)
 
-    with tf.compat.v1.variable_scope('discriminator_model_xz'):
+    with tf.variable_scope('discriminator_model_xz'):
         l_encoder, inter_layer_inp_xz = dis_xz(x_pl, z_gen,
                                             is_training=is_training_pl,
                     do_spectral_norm=do_spectral_norm)
@@ -137,14 +138,14 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                                               reuse=True,
                     do_spectral_norm=do_spectral_norm)
 
-    with tf.compat.v1.variable_scope('discriminator_model_xx'):
+    with tf.variable_scope('discriminator_model_xx'):
         x_logit_real, inter_layer_inp_xx = dis_xx(x_pl, x_pl,
                                                   is_training=is_training_pl,
                     do_spectral_norm=do_spectral_norm)
         x_logit_fake, inter_layer_rct_xx = dis_xx(x_pl, rec_x, is_training=is_training_pl,
                               reuse=True, do_spectral_norm=do_spectral_norm)
 
-    with tf.compat.v1.variable_scope('discriminator_model_zz'):
+    with tf.variable_scope('discriminator_model_zz'):
         z_logit_real, _ = dis_zz(z_pl, z_pl, is_training=is_training_pl,
                                  do_spectral_norm=do_spectral_norm)
         z_logit_fake, _ = dis_zz(z_pl, rec_z, is_training=is_training_pl,
@@ -153,61 +154,61 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
     with tf.name_scope('loss_functions'):
 
         # discriminator xz
-        loss_dis_enc = tf.compat.v1.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-            labels=tf.compat.v1.ones_like(l_encoder),logits=l_encoder))
-        loss_dis_gen = tf.compat.v1.reduce_mean(tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            labels=tf.compat.v1.zeros_like(l_generator),logits=l_generator))
+        loss_dis_enc = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            labels=tf.ones_like(l_encoder),logits=l_encoder))
+        loss_dis_gen = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            labels=tf.zeros_like(l_generator),logits=l_generator))
         dis_loss_xz = loss_dis_gen + loss_dis_enc
 
         # discriminator xx
-        x_real_dis = tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            logits=x_logit_real, labels=tf.compat.v1.ones_like(x_logit_real))
-        x_fake_dis = tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            logits=x_logit_fake, labels=tf.compat.v1.zeros_like(x_logit_fake))
-        dis_loss_xx = tf.compat.v1.reduce_mean(x_real_dis + x_fake_dis)
+        x_real_dis = tf.nn.sigmoid_cross_entropy_with_logits(
+            logits=x_logit_real, labels=tf.ones_like(x_logit_real))
+        x_fake_dis = tf.nn.sigmoid_cross_entropy_with_logits(
+            logits=x_logit_fake, labels=tf.zeros_like(x_logit_fake))
+        dis_loss_xx = tf.reduce_mean(x_real_dis + x_fake_dis)
 
         # discriminator zz
-        z_real_dis = tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            logits=z_logit_real, labels=tf.compat.v1.ones_like(z_logit_real))
-        z_fake_dis = tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            logits=z_logit_fake, labels=tf.compat.v1.zeros_like(z_logit_fake))
-        dis_loss_zz = tf.compat.v1.reduce_mean(z_real_dis + z_fake_dis)
+        z_real_dis = tf.nn.sigmoid_cross_entropy_with_logits(
+            logits=z_logit_real, labels=tf.ones_like(z_logit_real))
+        z_fake_dis = tf.nn.sigmoid_cross_entropy_with_logits(
+            logits=z_logit_fake, labels=tf.zeros_like(z_logit_fake))
+        dis_loss_zz = tf.reduce_mean(z_real_dis + z_fake_dis)
 
         loss_discriminator = dis_loss_xz + dis_loss_xx + dis_loss_zz if \
             allow_zz else dis_loss_xz + dis_loss_xx
 
         # generator and encoder
-        gen_loss_xz = tf.compat.v1.reduce_mean(tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            labels=tf.compat.v1.ones_like(l_generator),logits=l_generator))
-        enc_loss_xz = tf.compat.v1.reduce_mean(tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            labels=tf.compat.v1.zeros_like(l_encoder), logits=l_encoder))
-        x_real_gen = tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            logits=x_logit_real, labels=tf.compat.v1.zeros_like(x_logit_real))
-        x_fake_gen = tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            logits=x_logit_fake, labels=tf.compat.v1.ones_like(x_logit_fake))
-        z_real_gen = tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            logits=z_logit_real, labels=tf.compat.v1.zeros_like(z_logit_real))
-        z_fake_gen = tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-            logits=z_logit_fake, labels=tf.compat.v1.ones_like(z_logit_fake))
+        gen_loss_xz = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            labels=tf.ones_like(l_generator),logits=l_generator))
+        enc_loss_xz = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            labels=tf.zeros_like(l_encoder), logits=l_encoder))
+        x_real_gen = tf.nn.sigmoid_cross_entropy_with_logits(
+            logits=x_logit_real, labels=tf.zeros_like(x_logit_real))
+        x_fake_gen = tf.nn.sigmoid_cross_entropy_with_logits(
+            logits=x_logit_fake, labels=tf.ones_like(x_logit_fake))
+        z_real_gen = tf.nn.sigmoid_cross_entropy_with_logits(
+            logits=z_logit_real, labels=tf.zeros_like(z_logit_real))
+        z_fake_gen = tf.nn.sigmoid_cross_entropy_with_logits(
+            logits=z_logit_fake, labels=tf.ones_like(z_logit_fake))
 
-        cost_x = tf.compat.v1.reduce_mean(x_real_gen + x_fake_gen)
-        cost_z = tf.compat.v1.reduce_mean(z_real_gen + z_fake_gen)
+        cost_x = tf.reduce_mean(x_real_gen + x_fake_gen)
+        cost_z = tf.reduce_mean(z_real_gen + z_fake_gen)
 
         cycle_consistency_loss = cost_x + cost_z if allow_zz else cost_x
         loss_generator = gen_loss_xz + cycle_consistency_loss
         loss_encoder = enc_loss_xz + cycle_consistency_loss
 
-    with tf.compat.v1.name_scope('optimizers'):
+    with tf.name_scope('optimizers'):
 
         # control op dependencies for batch norm and trainable variables
-        tvars = tf.compat.v1.trainable_variables()
+        tvars = tf.trainable_variables()
         dxzvars = [var for var in tvars if 'discriminator_model_xz' in var.name]
         dxxvars = [var for var in tvars if 'discriminator_model_xx' in var.name]
         dzzvars = [var for var in tvars if 'discriminator_model_zz' in var.name]
         gvars = [var for var in tvars if 'generator_model' in var.name]
         evars = [var for var in tvars if 'encoder_model' in var.name]
 
-        update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         update_ops_gen = [x for x in update_ops if ('generator_model' in x.name)]
         update_ops_enc = [x for x in update_ops if ('encoder_model' in x.name)]
         update_ops_dis_xz = [x for x in update_ops if
@@ -217,30 +218,30 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
         update_ops_dis_zz = [x for x in update_ops if
                              ('discriminator_model_zz' in x.name)]
 
-        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate,
+        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate,
                                                   beta1=0.5)
 
-        with tf.compat.v1.control_dependencies(update_ops_gen):
+        with tf.control_dependencies(update_ops_gen):
             gen_op = optimizer.minimize(loss_generator, var_list=gvars,
                                             global_step=global_step)
-        with tf.compat.v1.control_dependencies(update_ops_enc):
+        with tf.control_dependencies(update_ops_enc):
             enc_op = optimizer.minimize(loss_encoder, var_list=evars)
 
-        with tf.compat.v1.control_dependencies(update_ops_dis_xz):
+        with tf.control_dependencies(update_ops_dis_xz):
             dis_op_xz = optimizer.minimize(dis_loss_xz, var_list=dxzvars)
 
-        with tf.compat.v1.control_dependencies(update_ops_dis_xx):
+        with tf.control_dependencies(update_ops_dis_xx):
             dis_op_xx = optimizer.minimize(dis_loss_xx, var_list=dxxvars)
 
-        with tf.compat.v1.control_dependencies(update_ops_dis_zz):
+        with tf.control_dependencies(update_ops_dis_zz):
             dis_op_zz = optimizer.minimize(dis_loss_zz, var_list=dzzvars)
 
         # Exponential Moving Average for inference
         def train_op_with_ema_dependency(vars, op):
-            ema = tf.compat.v1.train.ExponentialMovingAverage(decay=ema_decay)
+            ema = tf.train.ExponentialMovingAverage(decay=ema_decay)
             maintain_averages_op = ema.apply(vars)
-            with tf.compat.v1.control_dependencies([op]):
-                train_op = tf.compat.v1.group(maintain_averages_op)
+            with tf.control_dependencies([op]):
+                train_op = tf.group(maintain_averages_op)
             return train_op, ema
 
         train_gen_op, gen_ema = train_op_with_ema_dependency(gvars, gen_op)
@@ -252,18 +253,18 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
         train_dis_op_zz, zz_ema = train_op_with_ema_dependency(dzzvars,
                                                                dis_op_zz)
 
-    with tf.compat.v1.variable_scope('encoder_model'):
+    with tf.variable_scope('encoder_model'):
         z_gen_ema = enc(x_pl, is_training=is_training_pl,
                         getter=get_getter(enc_ema), reuse=True,
                         do_spectral_norm=do_spectral_norm)
 
-    with tf.compat.v1.variable_scope('generator_model'):
+    with tf.variable_scope('generator_model'):
         rec_x_ema = gen(z_gen_ema, is_training=is_training_pl,
                               getter=get_getter(gen_ema), reuse=True)
         x_gen_ema = gen(z_pl, is_training=is_training_pl,
                               getter=get_getter(gen_ema), reuse=True)
 
-    with tf.compat.v1.variable_scope('discriminator_model_xx'):
+    with tf.variable_scope('discriminator_model_xx'):
         l_encoder_emaxx, inter_layer_inp_emaxx = dis_xx(x_pl, x_pl,
                                                     is_training=is_training_pl,
                                                     getter=get_getter(xx_ema),
@@ -277,98 +278,98 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                                                       reuse=True,
                     do_spectral_norm=do_spectral_norm)
 
-    with tf.compat.v1.name_scope('Testing'):
+    with tf.name_scope('Testing'):
 
-        with tf.compat.v1.variable_scope('Scores'):
+        with tf.variable_scope('Scores'):
 
 
-            score_ch = tf.compat.v1.nn.sigmoid_cross_entropy_with_logits(
-                    labels=tf.compat.v1.ones_like(l_generator_emaxx),
+            score_ch = tf.nn.sigmoid_cross_entropy_with_logits(
+                    labels=tf.ones_like(l_generator_emaxx),
                     logits=l_generator_emaxx)
-            score_ch = tf.compat.v1.squeeze(score_ch)
+            score_ch = tf.squeeze(score_ch)
 
             rec = x_pl - rec_x_ema
-            rec = tf.compat.v1.contrib.layers.flatten(rec)
-            score_l1 = tf.compat.v1.norm(rec, ord=1, axis=1,
+            rec = tf.contrib.layers.flatten(rec)
+            score_l1 = tf.norm(rec, ord=1, axis=1,
                             keep_dims=False, name='d_loss')
-            score_l1 = tf.compat.v1.squeeze(score_l1)
+            score_l1 = tf.squeeze(score_l1)
 
             rec = x_pl - rec_x_ema
-            rec = tf.compat.v1.contrib.layers.flatten(rec)
-            score_l2 = tf.compat.v1.norm(rec, ord=2, axis=1,
+            rec = tf.contrib.layers.flatten(rec)
+            score_l2 = tf.norm(rec, ord=2, axis=1,
                             keep_dims=False, name='d_loss')
-            score_l2 = tf.compat.v1.squeeze(score_l2)
+            score_l2 = tf.squeeze(score_l2)
 
             inter_layer_inp, inter_layer_rct = inter_layer_inp_emaxx, \
                                                inter_layer_rct_emaxx
             fm = inter_layer_inp - inter_layer_rct
-            fm = tf.compat.v1.contrib.layers.flatten(fm)
-            score_fm = tf.compat.v1.norm(fm, ord=degree, axis=1,
+            fm = tf.contrib.layers.flatten(fm)
+            score_fm = tf.norm(fm, ord=degree, axis=1,
                              keep_dims=False, name='d_loss')
-            score_fm = tf.compat.v1.squeeze(score_fm)
+            score_fm = tf.squeeze(score_fm)
 
     if enable_early_stop:
-        rec_error_valid = tf.compat.v1.reduce_mean(score_fm)
+        rec_error_valid = tf.reduce_mean(score_fm)
 
     if enable_sm:
 
-        with tf.compat.v1.name_scope('summary'):
-            with tf.compat.v1.name_scope('dis_summary'):
-                tf.compat.v1.summary.scalar('loss_discriminator', loss_discriminator, ['dis'])
-                tf.compat.v1.summary.scalar('loss_dis_encoder', loss_dis_enc, ['dis'])
-                tf.compat.v1.summary.scalar('loss_dis_gen', loss_dis_gen, ['dis'])
-                tf.compat.v1.summary.scalar('loss_dis_xz', dis_loss_xz, ['dis'])
-                tf.compat.v1.summary.scalar('loss_dis_xx', dis_loss_xx, ['dis'])
+        with tf.name_scope('summary'):
+            with tf.name_scope('dis_summary'):
+                tf.summary.scalar('loss_discriminator', loss_discriminator, ['dis'])
+                tf.summary.scalar('loss_dis_encoder', loss_dis_enc, ['dis'])
+                tf.summary.scalar('loss_dis_gen', loss_dis_gen, ['dis'])
+                tf.summary.scalar('loss_dis_xz', dis_loss_xz, ['dis'])
+                tf.summary.scalar('loss_dis_xx', dis_loss_xx, ['dis'])
                 if allow_zz:
-                    tf.compat.v1.summary.scalar('loss_dis_zz', dis_loss_zz, ['dis'])
+                    tf.summary.scalar('loss_dis_zz', dis_loss_zz, ['dis'])
 
-            with tf.compat.v1.name_scope('gen_summary'):
-                tf.compat.v1.summary.scalar('loss_generator', loss_generator, ['gen'])
-                tf.compat.v1.summary.scalar('loss_encoder', loss_encoder, ['gen'])
-                tf.compat.v1.summary.scalar('loss_encgen_dxx', cost_x, ['gen'])
+            with tf.name_scope('gen_summary'):
+                tf.summary.scalar('loss_generator', loss_generator, ['gen'])
+                tf.summary.scalar('loss_encoder', loss_encoder, ['gen'])
+                tf.summary.scalar('loss_encgen_dxx', cost_x, ['gen'])
                 if allow_zz:
-                    tf.compat.v1.summary.scalar('loss_encgen_dzz', cost_z, ['gen'])
+                    tf.summary.scalar('loss_encgen_dzz', cost_z, ['gen'])
 
             if enable_early_stop:
-                with tf.compat.v1.name_scope('validation_summary'):
-                   tf.compat.v1.summary.scalar('valid', rec_error_valid, ['v'])
+                with tf.name_scope('validation_summary'):
+                   tf.summary.scalar('valid', rec_error_valid, ['v'])
 
-            with tf.compat.v1.name_scope('img_summary'):
-                heatmap_pl_latent = tf.compat.v1.placeholder(tf.compat.v1.float32,
+            with tf.name_scope('img_summary'):
+                heatmap_pl_latent = tf.placeholder(tf.float32,
                                                    shape=(1, 480, 640, 3),
                                                    name="heatmap_pl_latent")
-                sum_op_latent = tf.compat.v1.summary.image('heatmap_latent', heatmap_pl_latent)
+                sum_op_latent = tf.summary.image('heatmap_latent', heatmap_pl_latent)
 
             if dataset in IMAGES_DATASETS:
-                with tf.compat.v1.name_scope('image_summary'):
-                    tf.compat.v1.summary.image('reconstruct', rec_x, 8, ['image'])
-                    tf.compat.v1.summary.image('input_images', x_pl, 8, ['image'])
+                with tf.name_scope('image_summary'):
+                    tf.summary.image('reconstruct', rec_x, 8, ['image'])
+                    tf.summary.image('input_images', x_pl, 8, ['image'])
 
             else:
-                heatmap_pl_rec = tf.compat.v1.placeholder(tf.compat.v1.float32, shape=(1, 480, 640, 3),
+                heatmap_pl_rec = tf.placeholder(tf.float32, shape=(1, 480, 640, 3),
                                             name="heatmap_pl_rec")
-                with tf.compat.v1.name_scope('image_summary'):
-                    tf.compat.v1.summary.image('heatmap_rec', heatmap_pl_rec, 1, ['image'])
+                with tf.name_scope('image_summary'):
+                    tf.summary.image('heatmap_rec', heatmap_pl_rec, 1, ['image'])
 
-            sum_op_dis = tf.compat.v1.summary.merge_all('dis')
-            sum_op_gen = tf.compat.v1.summary.merge_all('gen')
-            sum_op = tf.compat.v1.summary.merge([sum_op_dis, sum_op_gen])
-            sum_op_im = tf.compat.v1.summary.merge_all('image')
-            sum_op_valid = tf.compat.v1.summary.merge_all('v')
+            sum_op_dis = tf.summary.merge_all('dis')
+            sum_op_gen = tf.summary.merge_all('gen')
+            sum_op = tf.summary.merge([sum_op_dis, sum_op_gen])
+            sum_op_im = tf.summary.merge_all('image')
+            sum_op_valid = tf.summary.merge_all('v')
 
     logdir = create_logdir(dataset, label, random_seed, allow_zz, score_method,
                            do_spectral_norm)
 
-    saver = tf.compat.v1.train.Saver(max_to_keep=2)
+    saver = tf.train.Saver(max_to_keep=2)
     save_model_secs = None if enable_early_stop else 20
-    sv = tf.compat.v1.train.Supervisor(logdir=logdir, save_summaries_secs=None, saver=saver, save_model_secs=save_model_secs) 
+    sv = tf.train.Supervisor(logdir=logdir, save_summaries_secs=None, saver=saver, save_model_secs=save_model_secs) 
 
     logger.info('Start training...')
     with sv.compat.v1.managed_session(config=config) as sess:
 
         step = sess.run(global_step)
         logger.info('Initialization done at step {}'.format(step/nr_batches_train))
-        writer = tf.compat.v1.summary.FileWriter(logdir, sess.graph)
+        writer = tf.summary.FileWriter(logdir, sess.graph)
         train_batch = 0
         epoch = 0
         best_valid_loss = 0
@@ -560,7 +561,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
 def run(args):
     """ Runs the training process"""
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-    with tf.compat.v1.Graph().as_default():
+    with tf.Graph().as_default():
         # Set the graph level seed
         tf.random.set_seed(args.rd)
         train_and_test(args.dataset, args.nb_epochs, args.d, args.rd, args.label,

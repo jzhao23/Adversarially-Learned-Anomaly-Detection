@@ -7,6 +7,8 @@ import os
 import shutil
 import urllib3
 import zipfile
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 # import data
 
 # Logging

@@ -1,36 +1,37 @@
 ### Credits https://github.com/taki0112/Spectral_Normalization-Tensorflow
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 def conv2d(inputs, filters, kernel_size, strides=1, padding='valid',
            use_bias=True, kernel_initializer=None,
-           bias_initializer=tf.compat.v1.zeros_initializer(), kernel_regularizer=None,
+           bias_initializer=tf.zeros_initializer(), kernel_regularizer=None,
            name=None,reuse=None):
 
-    with tf.compat.v1.variable_scope(name, reuse=reuse):
-        w = tf.compat.v1.get_variable("kernel", shape=[kernel_size, kernel_size, inputs.get_shape()[-1], filters], initializer=kernel_initializer,
+    with tf.variable_scope(name, reuse=reuse):
+        w = tf.get_variable("kernel", shape=[kernel_size, kernel_size, inputs.get_shape()[-1], filters], initializer=kernel_initializer,
                             regularizer=kernel_regularizer)
-        bias = tf.compat.v1.get_variable("bias", [filters], initializer=bias_initializer)
-        x = tf.compat.v1.nn.conv2d(input=inputs, filter=spectral_norm(w),
+        bias = tf.get_variable("bias", [filters], initializer=bias_initializer)
+        x = tf.nn.conv2d(input=inputs, filter=spectral_norm(w),
                          strides=[1, strides, strides, 1], padding=padding)
         if use_bias :
-            x = tf.compat.v1.nn.bias_add(x, bias)
+            x = tf.nn.bias_add(x, bias)
 
     return x
 
 def dense(inputs, units, use_bias=True, kernel_initializer=None,
-          bias_initializer=tf.compat.v1.zeros_initializer(), kernel_regularizer=None,
+          bias_initializer=tf.zeros_initializer(), kernel_regularizer=None,
           name=None,reuse=None):
 
-    with tf.compat.v1.variable_scope(name, reuse=reuse):
+    with tf.variable_scope(name, reuse=reuse):
         inputs = tf.contrib.layers.flatten(inputs)
         shape = inputs.get_shape().as_list()
         channels = shape[-1]
 
-        w = tf.compat.v1.get_variable("kernel", [channels, units], tf.float32,
+        w = tf.get_variable("kernel", [channels, units], tf.float32,
                                  initializer=kernel_initializer, regularizer=kernel_regularizer)
         if use_bias :
-            bias = tf.compat.v1.get_variable("bias", [units],
+            bias = tf.get_variable("bias", [units],
                                    initializer=bias_initializer)
 
             x = tf.matmul(inputs, spectral_norm(w)) + bias
@@ -43,7 +44,7 @@ def spectral_norm(w, iteration=1, eps=1e-12):
     w_shape = w.shape.as_list()
     w = tf.reshape(w, [-1, w_shape[-1]])
 
-    u = tf.compat.v1.get_variable("u", [1, w_shape[-1]], initializer=tf.compat.v1.truncated_normal_initializer(), trainable=False)
+    u = tf.get_variable("u", [1, w_shape[-1]], initializer=tf.truncated_normal_initializer(), trainable=False)
 
     u_hat = u
     v_hat = None
@@ -61,7 +62,7 @@ def spectral_norm(w, iteration=1, eps=1e-12):
     sigma = tf.matmul(tf.matmul(v_hat, w), tf.transpose(u_hat))
     w_norm = w / sigma
 
-    with tf.compat.v1.control_dependencies([u.assign(u_hat)]):
+    with tf.control_dependencies([u.assign(u_hat)]):
         w_norm = tf.reshape(w_norm, w_shape)
 
     return w_norm
