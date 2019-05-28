@@ -14,7 +14,7 @@ import seaborn as sns
 import pandas as pd
 import time
 import matplotlib.cm as cm
-from constants import IMAGES_DATASETS
+from utils.constants import IMAGES_DATASETS
 # import cv2
 sns.set(color_codes=True)
 
