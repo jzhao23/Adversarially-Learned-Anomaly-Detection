@@ -497,7 +497,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
 
             epoch += 1
 
-        sv.saver.save(sess, logdir+'/model.ckpt', global_step=step)
+        # sv.saver.save(sess, logdir+'/model.ckpt', global_step=step) deprecated
 
         logger.warn('Testing evaluation...')
 
