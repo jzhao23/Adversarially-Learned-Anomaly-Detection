@@ -11,6 +11,7 @@ def plot_hist_dis_reconstructions():
     for root, _, files in os.walk(walk_dir):
         for filename in files:
             file_path = os.path.join(root, filename)
+            print(file_path)
 
             try:
                 array = np.vstack(
