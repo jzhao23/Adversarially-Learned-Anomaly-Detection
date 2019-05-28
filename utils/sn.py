@@ -4,7 +4,7 @@ import tensorflow as tf
 
 def conv2d(inputs, filters, kernel_size, strides=1, padding='valid',
            use_bias=True, kernel_initializer=None,
-           bias_initializer=tf.zeros_initializer(), kernel_regularizer=None,
+           bias_initializer=tf.compat.v1.zeros_initializer(), kernel_regularizer=None,
            name=None,reuse=None):
 
     with tf.compat.v1.variable_scope(name, reuse=reuse):
