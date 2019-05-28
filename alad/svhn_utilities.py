@@ -352,7 +352,7 @@ def discriminator_xx(x, rec_x, is_training=False, getter=None, reuse=False,
             net = tf.compat.v1.layers.dropout(net, rate=0.2, training=is_training,
                                   name='dropout')
 
-        net = tf.compat.v1.contrib.layers.flatten(net)
+        net = tf.contrib.layers.flatten(net)
 
         intermediate_layer = net
         name_net = 'layer_3'
