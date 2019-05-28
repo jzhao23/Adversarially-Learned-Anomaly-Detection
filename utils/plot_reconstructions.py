@@ -14,7 +14,7 @@ def plot_hist_dis_reconstructions():
             file_path = os.path.join(root, filename)
             print("filepath: ", file_path)
 
-            if file_path.contains(".png"):
+            if "png" in file_path:
                 continue
 
             try:
