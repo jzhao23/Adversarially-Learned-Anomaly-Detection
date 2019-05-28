@@ -31,3 +31,4 @@ def plot_hist_dis_reconstructions():
         plt.close()
 
 if __name__ == "__main__":
+    plot_hist_dis_reconstructions()
