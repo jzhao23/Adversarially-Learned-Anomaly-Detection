@@ -335,11 +335,11 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                 with tf.name_scope('validation_summary'):
                    tf.summary.scalar('valid', rec_error_valid, ['v'])
 
-            with tf.name_scope('img_summary'):
+            """with tf.name_scope('img_summary'):
                 heatmap_pl_latent = tf.placeholder(tf.float32,
                                                    shape=(1, 480, 640, 3),
                                                    name="heatmap_pl_latent")
-                tf.summary.image('heatmap_latent', heatmap_pl_latent) #sum_op_latent=tf.summary.image('heatmap_latent', heatmap_pl_latent)
+                tf.summary.image('heatmap_latent', heatmap_pl_latent) #sum_op_latent=tf.summary.image('heatmap_latent', heatmap_pl_latent)"""
 
             if dataset in IMAGES_DATASETS:
                 with tf.name_scope('image_summary'):
