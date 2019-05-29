@@ -1,2 +1,6 @@
 #vscode files
 .vscode
+
+#datasets
+chest_data/xrays
+chest_data/raw_reports
