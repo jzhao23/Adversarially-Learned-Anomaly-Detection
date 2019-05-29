@@ -81,5 +81,4 @@ if __name__ == "__main__":
     parser.add_argument('--l1', nargs="?", type=float, default=-1, help='weight of the energy in DAGMM')
     parser.add_argument('--l2', nargs="?", type=float, default=-1, help='weight of the penalty of diag term in DAGMM')
 
-    with tf.device('/device:GPU:0'):
-        run(parser.parse_args())
+    run(parser.parse_args())
