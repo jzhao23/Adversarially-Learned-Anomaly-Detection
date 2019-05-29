@@ -67,7 +67,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
         enable_early_stop (bool): allow early stopping for determining the number of epochs
         do_spectral_norm (bool): allow spectral norm or not for ablation study
     """
-    config = tf.ConfigProto()
+    config = tf.ConfigProto(log_device_placement=True))
     config.gpu_options.allow_growth = True
     logger = logging.getLogger("ALAD.run.{}.{}".format(
         dataset, label))
@@ -559,6 +559,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
 def run(args):
     """ Runs the training process"""
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+    print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
     with tf.Graph().as_default():
         # Set the graph level seed
         tf.set_random_seed(args.rd)
