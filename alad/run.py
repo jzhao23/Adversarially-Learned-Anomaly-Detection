@@ -1,7 +1,6 @@
 import time
 import numpy as np
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+import tensorflow as tf
 #import tf_cnnvis
 import logging
 import importlib
@@ -53,7 +52,6 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                    allow_zz, enable_sm, score_method,
                    enable_early_stop, do_spectral_norm):
     """ Runs the AliCE on the specified dataset
-
     Note:
         Saves summaries on tensorboard. To display them, please use cmd line
         tensorboard --logdir=model.training_logdir() --port=number
@@ -69,7 +67,6 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
         enable_early_stop (bool): allow early stopping for determining the number of epochs
         do_spectral_norm (bool): allow spectral norm or not for ablation study
     """
-    #tf.reset_default_graph()
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     logger = logging.getLogger("ALAD.run.{}.{}".format(
@@ -290,13 +287,13 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
             score_ch = tf.squeeze(score_ch)
 
             rec = x_pl - rec_x_ema
-            rec = tf.layers.flatten(rec) #contrib1
+            rec = tf.contrib.layers.flatten(rec)
             score_l1 = tf.norm(rec, ord=1, axis=1,
                             keep_dims=False, name='d_loss')
             score_l1 = tf.squeeze(score_l1)
 
             rec = x_pl - rec_x_ema
-            rec = tf.layers.flatten(rec) #contrib2
+            rec = tf.contrib.layers.flatten(rec)
             score_l2 = tf.norm(rec, ord=2, axis=1,
                             keep_dims=False, name='d_loss')
             score_l2 = tf.squeeze(score_l2)
@@ -304,7 +301,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
             inter_layer_inp, inter_layer_rct = inter_layer_inp_emaxx, \
                                                inter_layer_rct_emaxx
             fm = inter_layer_inp - inter_layer_rct
-            fm = tf.layers.flatten(fm)  #contrib3
+            fm = tf.contrib.layers.flatten(fm)
             score_fm = tf.norm(fm, ord=degree, axis=1,
                              keep_dims=False, name='d_loss')
             score_fm = tf.squeeze(score_fm)
@@ -335,11 +332,11 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                 with tf.name_scope('validation_summary'):
                    tf.summary.scalar('valid', rec_error_valid, ['v'])
 
-            """with tf.name_scope('img_summary'):
+            with tf.name_scope('img_summary'):
                 heatmap_pl_latent = tf.placeholder(tf.float32,
                                                    shape=(1, 480, 640, 3),
                                                    name="heatmap_pl_latent")
-                tf.summary.image('heatmap_latent', heatmap_pl_latent) #sum_op_latent=tf.summary.image('heatmap_latent', heatmap_pl_latent)"""
+                sum_op_latent = tf.summary.image('heatmap_latent', heatmap_pl_latent)
 
             if dataset in IMAGES_DATASETS:
                 with tf.name_scope('image_summary'):
@@ -363,10 +360,10 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
 
     saver = tf.train.Saver(max_to_keep=2)
     save_model_secs = None if enable_early_stop else 20
-    #sv = tf.train.Supervisor(logdir=logdir, save_summaries_secs=None, saver=saver, save_model_secs=save_model_secs)  deprecated!
-    sv = tf.train.MonitoredTrainingSession(checkpoint_dir=logdir, config=config,save_summaries_secs=10)
+    sv = tf.train.Supervisor(logdir=logdir, save_summaries_secs=None, saver=saver, save_model_secs=save_model_secs) 
+
     logger.info('Start training...')
-    with sv as sess:
+    with sv.managed_session(config=config) as sess:
 
         step = sess.run(global_step)
         logger.info('Initialization done at step {}'.format(step/nr_batches_train))
@@ -399,7 +396,6 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                              z_pl: np.random.normal(size=[batch_size, latent_dim]),
                              is_training_pl: True,
                              learning_rate:lr}
-                print("Feed dict: ", feed_dict)
 
                 _, _, _, ld, ldxz, ldxx, ldzz, step = sess.run([train_dis_op_xz,
                                                               train_dis_op_xx,
@@ -486,8 +482,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                 if (valid_loss < best_valid_loss or epoch == FREQ_EV-1):
                     best_valid_loss = valid_loss
                     logger.info("Best model - valid loss = {:.4f} - saving...".format(best_valid_loss))
-                    # sv.saver.save(sess, logdir+'/model.ckpt', global_step=step) deprecated
-                    global_step = step
+                    sv.saver.save(sess, logdir+'/model.ckpt', global_step=step)
                     nb_without_improvements = 0
                 else:
                     nb_without_improvements += FREQ_EV
@@ -500,8 +495,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
 
             epoch += 1
 
-        # sv.saver.save(sess, logdir+'/model.ckpt', global_step=step) deprecated
-        global_step = step
+        sv.saver.save(sess, logdir+'/model.ckpt', global_step=step)
 
         logger.warn('Testing evaluation...')
 

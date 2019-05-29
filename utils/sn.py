@@ -1,7 +1,6 @@
 ### Credits https://github.com/taki0112/Spectral_Normalization-Tensorflow
 
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+import tensorflow as tf
 
 def conv2d(inputs, filters, kernel_size, strides=1, padding='valid',
            use_bias=True, kernel_initializer=None,
@@ -24,7 +23,7 @@ def dense(inputs, units, use_bias=True, kernel_initializer=None,
           name=None,reuse=None):
 
     with tf.variable_scope(name, reuse=reuse):
-        inputs = tf.layers.flatten(inputs) #contrib1
+        inputs = tf.contrib.layers.flatten(inputs)
         shape = inputs.get_shape().as_list()
         channels = shape[-1]
 

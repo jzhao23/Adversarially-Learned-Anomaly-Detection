@@ -1,12 +1,8 @@
 """
-
 CIFAR10 ALAD architecture.
-
 Generator (decoder), encoder and discriminator.
-
 """
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+import tensorflow as tf
 from utils import sn
 
 learning_rate = 0.0002
@@ -24,18 +20,14 @@ def leakyReLu(x, alpha=0.2, name=None):
 def encoder(x_inp, is_training=False, getter=None, reuse=False,
             do_spectral_norm=True):
     """ Encoder architecture in tensorflow
-
     Maps the data into the latent space
-
     Args:
         x_inp (tensor): input data for the encoder.
         is_training (bool): for batch norms and dropouts
         getter: for exponential moving average during inference
         reuse (bool): sharing variables or not
-
     Returns:
         net (tensor): last activation layer of the encoder
-
     """
     layers = sn if do_spectral_norm else tf.layers
 
@@ -96,18 +88,14 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
 
 def decoder(z_inp, is_training=False, getter=None, reuse=False):
     """ Generator architecture in tensorflow
-
     Generates data from the latent space
-
     Args:
         z_inp (tensor): input variable in the latent space
         is_training (bool): for batch norms and dropouts
         getter: for exponential moving average during inference
         reuse (bool): sharing variables or not
-
     Returns:
         net (tensor): last activation layer of the generator
-
     """
     with tf.variable_scope('generator', reuse=reuse, custom_getter=getter):
         net = tf.reshape(z_inp, [-1, 1, 1, latent_dim])
@@ -175,20 +163,16 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
 def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
                      do_spectral_norm=True):
     """ Discriminator architecture in tensorflow
-
     Discriminates between pairs (E(x), x) and (z, G(z))
-
     Args:
         x_inp (tensor): input data for the discriminator.
         z_inp (tensor): input variable in the latent space
         is_training (bool): for batch norms and dropouts
         getter: for exponential moving average during inference
         reuse (bool): sharing variables or not
-
     Returns:
         logits (tensor): last activation layer of the discriminator (shape 1)
         intermediate_layer (tensor): intermediate layer for feature matching
-
     """
     layers = sn if do_spectral_norm else tf.layers
 
@@ -301,20 +285,16 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
 def discriminator_xx(x, rec_x, is_training=False, getter=None, reuse=False,
                      do_spectral_norm=True):
     """ Discriminator architecture in tensorflow
-
     Discriminates between (x,x) and (x,rec_x)
-
     Args:
         x (tensor): input from the data space
         rec_x (tensor): reconstructed data
         is_training (bool): for batch norms and dropouts
         getter: for exponential moving average during inference
         reuse (bool): sharing variables or not
-
     Returns:
         logits (tensor): last activation layer of the discriminator
         intermediate_layer (tensor): intermediate layer for feature matching
-
     """
     layers = sn if do_spectral_norm else tf.layers
 
@@ -353,7 +333,7 @@ def discriminator_xx(x, rec_x, is_training=False, getter=None, reuse=False,
             net = tf.layers.dropout(net, rate=0.2, training=is_training,
                                   name='dropout')
 
-        net = tf.layers.flatten(net)
+        net = tf.contrib.layers.flatten(net)
 
         intermediate_layer = net
         name_net = 'layer_3'
@@ -370,20 +350,16 @@ def discriminator_xx(x, rec_x, is_training=False, getter=None, reuse=False,
 def discriminator_zz(z, rec_z, is_training=False, getter=None, reuse=False,
                      do_spectral_norm=True):
     """ Discriminator architecture in tensorflow
-
     Discriminates between (z,z) and (z,rec_z)
-
     Args:
         z (tensor): input from the latent space
         rec_z (tensor): reconstructed data
         is_training (bool): for batch norms and dropouts
         getter: for exponential moving average during inference
         reuse (bool): sharing variables or not
-
     Returns:
         logits (tensor): last activation layer of the discriminator
         intermediate_layer (tensor): intermediate layer for feature matching
-
     """
     layers = sn if do_spectral_norm else tf.layers
 
