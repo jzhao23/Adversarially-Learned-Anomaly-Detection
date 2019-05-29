@@ -339,7 +339,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                 heatmap_pl_latent = tf.placeholder(tf.float32,
                                                    shape=(1, 480, 640, 3),
                                                    name="heatmap_pl_latent")
-                sum_op_latent = tf.summary.image('heatmap_latent', heatmap_pl_latent)
+                tf.summary.image('heatmap_latent', heatmap_pl_latent) #sum_op_latent=tf.summary.image('heatmap_latent', heatmap_pl_latent)
 
             if dataset in IMAGES_DATASETS:
                 with tf.name_scope('image_summary'):
