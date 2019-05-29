@@ -399,6 +399,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                              z_pl: np.random.normal(size=[batch_size, latent_dim]),
                              is_training_pl: True,
                              learning_rate:lr}
+                print("Feed dict: ", feed_dict)
 
                 _, _, _, ld, ldxz, ldxx, ldzz, step = sess.run([train_dis_op_xz,
                                                               train_dis_op_xx,
