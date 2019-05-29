@@ -363,7 +363,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
     sv = tf.train.Supervisor(logdir=logdir, save_summaries_secs=None, saver=saver, save_model_secs=save_model_secs) 
 
     logger.info('Start training...')
-    with tf.device('//device:GPU:0'):
+    with tf.device('/device:GPU:5'):
         with sv.managed_session(config=config) as sess:
 
             step = sess.run(global_step)
