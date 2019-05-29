@@ -363,197 +363,198 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
     sv = tf.train.Supervisor(logdir=logdir, save_summaries_secs=None, saver=saver, save_model_secs=save_model_secs) 
 
     logger.info('Start training...')
-    with sv.managed_session(config=config) as sess:
+    with tf.device('//device:GPU:0'):
+        with sv.managed_session(config=config) as sess:
 
-        step = sess.run(global_step)
-        logger.info('Initialization done at step {}'.format(step/nr_batches_train))
-        writer = tf.summary.FileWriter(logdir, sess.graph)
-        train_batch = 0
-        epoch = 0
-        best_valid_loss = 0
-        request_stop = False
+            step = sess.run(global_step)
+            logger.info('Initialization done at step {}'.format(step/nr_batches_train))
+            writer = tf.summary.FileWriter(logdir, sess.graph)
+            train_batch = 0
+            epoch = 0
+            best_valid_loss = 0
+            request_stop = False
 
-        while not sv.should_stop() and epoch < nb_epochs:
+            while not sv.should_stop() and epoch < nb_epochs:
 
-            lr = starting_lr
-            begin = time.time()
+                lr = starting_lr
+                begin = time.time()
 
-             # construct randomly permuted minibatches
-            trainx = trainx[rng.permutation(trainx.shape[0])]  # shuffling dataset
-            trainx_copy = trainx_copy[rng.permutation(trainx.shape[0])]
-            train_loss_dis_xz, train_loss_dis_xx,  train_loss_dis_zz, \
-            train_loss_dis, train_loss_gen, train_loss_enc = [0, 0, 0, 0, 0, 0]
+                # construct randomly permuted minibatches
+                trainx = trainx[rng.permutation(trainx.shape[0])]  # shuffling dataset
+                trainx_copy = trainx_copy[rng.permutation(trainx.shape[0])]
+                train_loss_dis_xz, train_loss_dis_xx,  train_loss_dis_zz, \
+                train_loss_dis, train_loss_gen, train_loss_enc = [0, 0, 0, 0, 0, 0]
 
-            # Training
-            for t in range(nr_batches_train):
+                # Training
+                for t in range(nr_batches_train):
 
-                display_progression_epoch(t, nr_batches_train)
+                    display_progression_epoch(t, nr_batches_train)
+                    ran_from = t * batch_size
+                    ran_to = (t + 1) * batch_size
+
+                    # train discriminator
+                    feed_dict = {x_pl: trainx[ran_from:ran_to],
+                                z_pl: np.random.normal(size=[batch_size, latent_dim]),
+                                is_training_pl: True,
+                                learning_rate:lr}
+
+                    _, _, _, ld, ldxz, ldxx, ldzz, step = sess.run([train_dis_op_xz,
+                                                                train_dis_op_xx,
+                                                                train_dis_op_zz,
+                                                                loss_discriminator,
+                                                                dis_loss_xz,
+                                                                dis_loss_xx,
+                                                                dis_loss_zz,
+                                                                global_step],
+                                                                feed_dict=feed_dict)
+                    train_loss_dis += ld
+                    train_loss_dis_xz += ldxz
+                    train_loss_dis_xx += ldxx
+                    train_loss_dis_zz += ldzz
+
+                    # train generator and encoder
+                    feed_dict = {x_pl: trainx_copy[ran_from:ran_to],
+                                z_pl: np.random.normal(size=[batch_size, latent_dim]),
+                                is_training_pl: True,
+                                learning_rate:lr}
+                    _,_, le, lg = sess.run([train_gen_op,
+                                                train_enc_op,
+                                                loss_encoder,
+                                                loss_generator],
+                                            feed_dict=feed_dict)
+                    train_loss_gen += lg
+                    train_loss_enc += le
+
+                    if enable_sm:
+                        sm = sess.run(sum_op, feed_dict=feed_dict)
+                        writer.add_summary(sm, step)
+
+                        if t % FREQ_PRINT == 0 and dataset in IMAGES_DATASETS:  # inspect reconstruction
+                            t = np.random.randint(0, trainx.shape[0]-batch_size)
+                            ran_from = t
+                            ran_to = t + batch_size
+                            feed_dict = {x_pl: trainx[ran_from:ran_to],
+                                z_pl: np.random.normal(
+                                    size=[batch_size, latent_dim]),
+                                is_training_pl: False}
+                            sm = sess.run(sum_op_im, feed_dict=feed_dict)
+                            writer.add_summary(sm, step)#train_batch)
+
+                    train_batch += 1
+
+                train_loss_gen /= nr_batches_train
+                train_loss_enc /= nr_batches_train
+                train_loss_dis /= nr_batches_train
+                train_loss_dis_xz /= nr_batches_train
+                train_loss_dis_xx /= nr_batches_train
+                train_loss_dis_zz /= nr_batches_train
+
+                logger.info('Epoch terminated')
+                if allow_zz:
+                    print("Epoch %d | time = %ds | loss gen = %.4f | loss enc = %.4f | "
+                        "loss dis = %.4f | loss dis xz = %.4f | loss dis xx = %.4f | "
+                        "loss dis zz = %.4f"
+                        % (epoch, time.time() - begin, train_loss_gen,
+                            train_loss_enc, train_loss_dis, train_loss_dis_xz,
+                            train_loss_dis_xx, train_loss_dis_zz))
+                else:
+                    print("Epoch %d | time = %ds | loss gen = %.4f | loss enc = %.4f | "
+                        "loss dis = %.4f | loss dis xz = %.4f | loss dis xx = %.4f | "
+                        % (epoch, time.time() - begin, train_loss_gen,
+                            train_loss_enc, train_loss_dis, train_loss_dis_xz,
+                            train_loss_dis_xx))
+
+                ##EARLY STOPPING
+                if (epoch + 1) % FREQ_EV == 0 and enable_early_stop:
+
+                    valid_loss = 0
+                    feed_dict = {x_pl: validx,
+                                z_pl: np.random.normal(size=[validx.shape[0], latent_dim]),
+                                is_training_pl: False}
+                    vl, lat = sess.run([rec_error_valid, rec_z], feed_dict=feed_dict)
+                    valid_loss += vl
+
+                    if enable_sm:
+                        sm = sess.run(sum_op_valid, feed_dict=feed_dict)
+                        writer.add_summary(sm, step)  # train_batch)
+
+                    logger.info('Validation: valid loss {:.4f}'.format(valid_loss))
+
+                    if (valid_loss < best_valid_loss or epoch == FREQ_EV-1):
+                        best_valid_loss = valid_loss
+                        logger.info("Best model - valid loss = {:.4f} - saving...".format(best_valid_loss))
+                        sv.saver.save(sess, logdir+'/model.ckpt', global_step=step)
+                        nb_without_improvements = 0
+                    else:
+                        nb_without_improvements += FREQ_EV
+
+                    if nb_without_improvements > PATIENCE:
+                        sv.request_stop()
+                        logger.warning(
+                        "Early stopping at epoch {} with weights from epoch {}".format(
+                            epoch, epoch - nb_without_improvements))
+
+                epoch += 1
+
+            sv.saver.save(sess, logdir+'/model.ckpt', global_step=step)
+
+            logger.warn('Testing evaluation...')
+
+            scores_ch = []
+            scores_l1 = []
+            scores_l2 = []
+            scores_fm = []
+            inference_time = []
+
+            # Create scores
+            for t in range(nr_batches_test):
+
+                # construct randomly permuted minibatches
                 ran_from = t * batch_size
                 ran_to = (t + 1) * batch_size
+                begin_test_time_batch = time.time()
 
-                # train discriminator
-                feed_dict = {x_pl: trainx[ran_from:ran_to],
-                             z_pl: np.random.normal(size=[batch_size, latent_dim]),
-                             is_training_pl: True,
-                             learning_rate:lr}
+                feed_dict = {x_pl: testx[ran_from:ran_to],
+                            z_pl: np.random.normal(size=[batch_size, latent_dim]),
+                            is_training_pl:False}
 
-                _, _, _, ld, ldxz, ldxx, ldzz, step = sess.run([train_dis_op_xz,
-                                                              train_dis_op_xx,
-                                                              train_dis_op_zz,
-                                                              loss_discriminator,
-                                                              dis_loss_xz,
-                                                              dis_loss_xx,
-                                                              dis_loss_zz,
-                                                              global_step],
-                                                             feed_dict=feed_dict)
-                train_loss_dis += ld
-                train_loss_dis_xz += ldxz
-                train_loss_dis_xx += ldxx
-                train_loss_dis_zz += ldzz
+                scores_ch += sess.run(score_ch, feed_dict=feed_dict).tolist()
+                scores_l1 += sess.run(score_l1, feed_dict=feed_dict).tolist()
+                scores_l2 += sess.run(score_l2, feed_dict=feed_dict).tolist()
+                scores_fm += sess.run(score_fm, feed_dict=feed_dict).tolist()
+                inference_time.append(time.time() - begin_test_time_batch)
 
-                # train generator and encoder
-                feed_dict = {x_pl: trainx_copy[ran_from:ran_to],
-                             z_pl: np.random.normal(size=[batch_size, latent_dim]),
-                             is_training_pl: True,
-                             learning_rate:lr}
-                _,_, le, lg = sess.run([train_gen_op,
-                                            train_enc_op,
-                                            loss_encoder,
-                                            loss_generator],
-                                           feed_dict=feed_dict)
-                train_loss_gen += lg
-                train_loss_enc += le
 
-                if enable_sm:
-                    sm = sess.run(sum_op, feed_dict=feed_dict)
-                    writer.add_summary(sm, step)
+            inference_time = np.mean(inference_time)
+            logger.info('Testing : mean inference time is %.4f' % (inference_time))
 
-                    if t % FREQ_PRINT == 0 and dataset in IMAGES_DATASETS:  # inspect reconstruction
-                        t = np.random.randint(0, trainx.shape[0]-batch_size)
-                        ran_from = t
-                        ran_to = t + batch_size
-                        feed_dict = {x_pl: trainx[ran_from:ran_to],
-                            z_pl: np.random.normal(
-                                size=[batch_size, latent_dim]),
+            if testx.shape[0] % batch_size != 0:
+
+                batch, size = batch_fill(testx, batch_size)
+                feed_dict = {x_pl: batch,
+                            z_pl: np.random.normal(size=[batch_size, latent_dim]),
                             is_training_pl: False}
-                        sm = sess.run(sum_op_im, feed_dict=feed_dict)
-                        writer.add_summary(sm, step)#train_batch)
 
-                train_batch += 1
-
-            train_loss_gen /= nr_batches_train
-            train_loss_enc /= nr_batches_train
-            train_loss_dis /= nr_batches_train
-            train_loss_dis_xz /= nr_batches_train
-            train_loss_dis_xx /= nr_batches_train
-            train_loss_dis_zz /= nr_batches_train
-
-            logger.info('Epoch terminated')
-            if allow_zz:
-                print("Epoch %d | time = %ds | loss gen = %.4f | loss enc = %.4f | "
-                      "loss dis = %.4f | loss dis xz = %.4f | loss dis xx = %.4f | "
-                      "loss dis zz = %.4f"
-                      % (epoch, time.time() - begin, train_loss_gen,
-                         train_loss_enc, train_loss_dis, train_loss_dis_xz,
-                         train_loss_dis_xx, train_loss_dis_zz))
-            else:
-                print("Epoch %d | time = %ds | loss gen = %.4f | loss enc = %.4f | "
-                      "loss dis = %.4f | loss dis xz = %.4f | loss dis xx = %.4f | "
-                      % (epoch, time.time() - begin, train_loss_gen,
-                         train_loss_enc, train_loss_dis, train_loss_dis_xz,
-                         train_loss_dis_xx))
-
-            ##EARLY STOPPING
-            if (epoch + 1) % FREQ_EV == 0 and enable_early_stop:
-
-                valid_loss = 0
-                feed_dict = {x_pl: validx,
-                             z_pl: np.random.normal(size=[validx.shape[0], latent_dim]),
-                             is_training_pl: False}
-                vl, lat = sess.run([rec_error_valid, rec_z], feed_dict=feed_dict)
-                valid_loss += vl
-
-                if enable_sm:
-                    sm = sess.run(sum_op_valid, feed_dict=feed_dict)
-                    writer.add_summary(sm, step)  # train_batch)
-
-                logger.info('Validation: valid loss {:.4f}'.format(valid_loss))
-
-                if (valid_loss < best_valid_loss or epoch == FREQ_EV-1):
-                    best_valid_loss = valid_loss
-                    logger.info("Best model - valid loss = {:.4f} - saving...".format(best_valid_loss))
-                    sv.saver.save(sess, logdir+'/model.ckpt', global_step=step)
-                    nb_without_improvements = 0
-                else:
-                    nb_without_improvements += FREQ_EV
-
-                if nb_without_improvements > PATIENCE:
-                    sv.request_stop()
-                    logger.warning(
-                      "Early stopping at epoch {} with weights from epoch {}".format(
-                          epoch, epoch - nb_without_improvements))
-
-            epoch += 1
-
-        sv.saver.save(sess, logdir+'/model.ckpt', global_step=step)
-
-        logger.warn('Testing evaluation...')
-
-        scores_ch = []
-        scores_l1 = []
-        scores_l2 = []
-        scores_fm = []
-        inference_time = []
-
-        # Create scores
-        for t in range(nr_batches_test):
-
-            # construct randomly permuted minibatches
-            ran_from = t * batch_size
-            ran_to = (t + 1) * batch_size
-            begin_test_time_batch = time.time()
-
-            feed_dict = {x_pl: testx[ran_from:ran_to],
-                         z_pl: np.random.normal(size=[batch_size, latent_dim]),
-                         is_training_pl:False}
-
-            scores_ch += sess.run(score_ch, feed_dict=feed_dict).tolist()
-            scores_l1 += sess.run(score_l1, feed_dict=feed_dict).tolist()
-            scores_l2 += sess.run(score_l2, feed_dict=feed_dict).tolist()
-            scores_fm += sess.run(score_fm, feed_dict=feed_dict).tolist()
-            inference_time.append(time.time() - begin_test_time_batch)
+                bscores_ch = sess.run(score_ch,feed_dict=feed_dict).tolist()
+                bscores_l1 = sess.run(score_l1,feed_dict=feed_dict).tolist()
+                bscores_l2 = sess.run(score_l2,feed_dict=feed_dict).tolist()
+                bscores_fm = sess.run(score_fm,feed_dict=feed_dict).tolist()
 
 
-        inference_time = np.mean(inference_time)
-        logger.info('Testing : mean inference time is %.4f' % (inference_time))
+                scores_ch += bscores_ch[:size]
+                scores_l1 += bscores_l1[:size]
+                scores_l2 += bscores_l2[:size]
+                scores_fm += bscores_fm[:size]
 
-        if testx.shape[0] % batch_size != 0:
-
-            batch, size = batch_fill(testx, batch_size)
-            feed_dict = {x_pl: batch,
-                         z_pl: np.random.normal(size=[batch_size, latent_dim]),
-                         is_training_pl: False}
-
-            bscores_ch = sess.run(score_ch,feed_dict=feed_dict).tolist()
-            bscores_l1 = sess.run(score_l1,feed_dict=feed_dict).tolist()
-            bscores_l2 = sess.run(score_l2,feed_dict=feed_dict).tolist()
-            bscores_fm = sess.run(score_fm,feed_dict=feed_dict).tolist()
-
-
-            scores_ch += bscores_ch[:size]
-            scores_l1 += bscores_l1[:size]
-            scores_l2 += bscores_l2[:size]
-            scores_fm += bscores_fm[:size]
-
-        model = 'alad_sn{}_dzz{}'.format(do_spectral_norm, allow_zz)
-        save_results(scores_ch, testy, model, dataset, 'ch',
-                     'dzzenabled{}'.format(allow_zz), label, random_seed, step)
-        save_results(scores_l1, testy, model, dataset, 'l1',
-                     'dzzenabled{}'.format(allow_zz), label, random_seed, step)
-        save_results(scores_l2, testy, model, dataset, 'l2',
-                     'dzzenabled{}'.format(allow_zz), label, random_seed, step)
-        save_results(scores_fm, testy, model, dataset, 'fm',
-                     'dzzenabled{}'.format(allow_zz), label, random_seed,  step)
+            model = 'alad_sn{}_dzz{}'.format(do_spectral_norm, allow_zz)
+            save_results(scores_ch, testy, model, dataset, 'ch',
+                        'dzzenabled{}'.format(allow_zz), label, random_seed, step)
+            save_results(scores_l1, testy, model, dataset, 'l1',
+                        'dzzenabled{}'.format(allow_zz), label, random_seed, step)
+            save_results(scores_l2, testy, model, dataset, 'l2',
+                        'dzzenabled{}'.format(allow_zz), label, random_seed, step)
+            save_results(scores_fm, testy, model, dataset, 'fm',
+                        'dzzenabled{}'.format(allow_zz), label, random_seed,  step)
 
 
 def run(args):
