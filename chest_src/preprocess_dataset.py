@@ -7,15 +7,15 @@ import matplotlib.pyplot as plt
 
 from utils import most_common_list
 
-xrays_dir = "../data/xrays"
-reports_dir = "../data/raw_reports"
+xrays_dir = "../chest_data/xrays"
+reports_dir = "../chest_data/raw_reports"
 show_histogram = True
 
 def save_dataset(dataset):
     '''
     dataset (numpy array of dicts): output of build_dataset()
     '''
-    np.save("../data/dataset.npy", dataset)
+    np.save("../chest_data/dataset.npy", dataset)
 
 def extract_label_from_report(parsed_report):
     '''
