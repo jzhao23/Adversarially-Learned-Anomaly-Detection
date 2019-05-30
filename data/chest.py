@@ -66,9 +66,6 @@ def _get_adapted_dataset(split, label, centered, normalize):
     key_img = 'x_' + split
     key_lbl = 'y_' + split
 
-    if label != -1:
-        dataset[key_lbl] = adapt_labels_outlier_task(dataset[key_lbl],
-                                                         abnormal_list)
     return (dataset[key_img], dataset[key_lbl])
 
 def _load_holdout_dataset(abnormal_list=[]):
@@ -79,7 +76,7 @@ def _load_holdout_dataset(abnormal_list=[]):
 
     # holdout training and dev data if requested
     X_descr = utils.load_X_descr()
-    x_train_all_descr, x_dev_all_descr, _ = X_descr
+    x_train_all_descr, x_dev_all_descr, x_test_descr = X_descr
 
     holdout_x_train = []
     holdout_y_train = []
@@ -97,9 +94,13 @@ def _load_holdout_dataset(abnormal_list=[]):
     
     x_train = np.array(holdout_x_train).reshape((-1, 224, 224, 3))
     y_train = np.array(holdout_y_train).reshape((-1, 1))
+    y_train = np.array(np.zeros(y_train.shape))
 
     x_dev = np.array(holdout_x_dev).reshape((-1, 224, 224, 3))
     y_dev = np.array(holdout_y_dev).reshape((-1, 1))
+    y_dev = np.array(np.zeros(y_dev.shape))
+
+    (y_test[x_test_descr in abnormal_list], y_test[x_test_descr not in abnormal_list]) = (1, 0)
 
     return (x_train, x_dev, x_test, y_train, y_dev, y_test)
 

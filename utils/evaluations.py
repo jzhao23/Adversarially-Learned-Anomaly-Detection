@@ -84,10 +84,8 @@ def do_hist(scores, true_labels, directory, dataset, random_seed, display=False)
     idx_inliers = (true_labels == 0)
     idx_outliers = (true_labels == 1)
     hrange = (min(scores), max(scores))
-    plt.hist(scores[idx_inliers], 50, facecolor=(0, 1, 0, 0.5),
-             label="Normal samples", density=True, range=hrange)
-    plt.hist(scores[idx_outliers], 50, facecolor=(1, 0, 0, 0.5),
-             label="Anomalous samples", density=True, range=hrange)
+    plt.hist(scores[idx_inliers], 50, label="Normal samples", density=True, range=hrange)
+    plt.hist(scores[idx_outliers], 50, label="Anomalous samples", density=True, range=hrange)
     plt.title("Distribution of the anomaly score")
     plt.legend()
     if display:
