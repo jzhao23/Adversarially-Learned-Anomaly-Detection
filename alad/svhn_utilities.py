@@ -342,6 +342,7 @@ def discriminator_xx(x, rec_x, is_training=False, getter=None, reuse=False,
                                   units=1,
                                    kernel_initializer=init_kernel,
                                    name='fc')
+            print("net before  squeeze: ", net)
 
             logits = tf.squeeze(net)
 
