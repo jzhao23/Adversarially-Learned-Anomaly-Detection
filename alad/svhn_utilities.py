@@ -82,6 +82,7 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
                                    padding='VALID',
                                    kernel_initializer=init_kernel,
                                    name='conv')
+            print("size before squeeze: ", net)
             net = tf.squeeze(net, [1, 2])
 
     return net
@@ -342,7 +343,6 @@ def discriminator_xx(x, rec_x, is_training=False, getter=None, reuse=False,
                                   units=1,
                                    kernel_initializer=init_kernel,
                                    name='fc')
-            print("net before  squeeze: ", net)
 
             logits = tf.squeeze(net)
 
