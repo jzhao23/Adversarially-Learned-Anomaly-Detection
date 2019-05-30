@@ -23,7 +23,7 @@ def preprocess_xray(xray_path):
 
 def load_X_and_Y(num_examples=-1, test_only=False):
     curr_dir = os.path.dirname(os.path.abspath(__file__))
-    dataset = np.load(os.path.join(curr_dir, "../data/dataset.npy"))
+    dataset = np.load(os.path.join(curr_dir, "../chest_data/dataset.npy"))
 
     x_train, x_dev, x_test = [], [], []
     y_train, y_dev, y_test = [], [], []
