@@ -73,7 +73,7 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
                                                 training=is_training)
             net = leakyReLu(net, name='leaky_relu')
 
-        name_net = 'layer_4'
+        name_net = 'layer_4' # 28/28
         with tf.variable_scope(name_net):
             net = tf.layers.conv2d(net,
                                    latent_dim,
@@ -82,6 +82,8 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
                                    padding='VALID',
                                    kernel_initializer=init_kernel,
                                    name='conv')
+            print("size before squeeze: ", net)
+            print(net.get_shape())
             net = tf.squeeze(net, [1, 2])
 
     return net
