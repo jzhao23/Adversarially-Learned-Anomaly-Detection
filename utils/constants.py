@@ -1,1 +1,1 @@
-IMAGES_DATASETS = ['cifar10', 'svhn']
+IMAGES_DATASETS = ['cifar10', 'svhn', 'chest']
