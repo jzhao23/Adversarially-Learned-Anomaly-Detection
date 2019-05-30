@@ -357,7 +357,7 @@ def train_and_test(dataset, nb_epochs, random_seed, label):
 
 def run(args):
     """ Runs the training process"""
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
     with tf.Graph().as_default():
         # Set the graph level seed
         tf.set_random_seed(args.rd)
