@@ -81,11 +81,18 @@ def get_percentile(scores, dataset):
 
 def do_hist(scores, true_labels, directory, dataset, random_seed, display=False):
     plt.figure()
-    idx_inliers = (true_labels == 0)
-    idx_outliers = (true_labels == 1)
+    #idx_inliers = (true_labels == 0)
+    #idx_outliers = (true_labels == 1)
     hrange = (min(scores), max(scores))
-    plt.hist(scores[idx_inliers], bins=50, label="Normal samples", density=True)
-    plt.hist(scores[idx_outliers], bins=50, label="Anomalous samples", density=True)
+    scores_in = []
+    scores_out = []
+    for i in range(len(true_labels)):
+        if true_labels[i] == 0:
+            scores_in.append(scores[i])
+        else:
+            scores_out.append(scores[i])
+    plt.hist(scores_in, bins=50, label="Normal samples", density=True) #scores[idx_inliers]
+    plt.hist(scores_out, bins=50, label="Anomalous samples", density=True) #scores[idx_outliers]
     plt.title("Distribution of the anomaly score")
     plt.legend()
     if display:
@@ -186,6 +193,7 @@ def save_results(scores, true_labels, model, dataset, method, weight, label,
 
     
     scores = np.array(scores) 
+    testy = np.array(true_labels)
    
     roc_auc = do_roc(scores, true_labels, file_name=file_name,
                     directory=directory)
