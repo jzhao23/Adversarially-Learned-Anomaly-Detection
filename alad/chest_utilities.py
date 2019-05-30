@@ -219,15 +219,15 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
     with tf.variable_scope('discriminator_xz', reuse=reuse, custom_getter=getter):
         name_net = 'x_layer_1'
         with tf.variable_scope(name_net):
-            x = layers.conv2d(x_inp,
+            x = layers.conv2d(x_inp, #224,224 
                                  filters=128,
-                                 kernel_size=4,
-                                 strides=2,
+                                 kernel_size=10,
+                                 strides=4,
                                  padding='SAME',
                                  kernel_initializer=init_kernel,
                                  name='conv1')
 
-            x = leakyReLu(x, 0.2, name='conv1/leaky_relu')
+            x = leakyReLu(x, 0.2, name='conv1/leaky_relu') #56
 
         name_net = 'x_layer_2'
         with tf.variable_scope(name_net):
@@ -243,12 +243,12 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
                                               training=is_training,
                                               name='conv2/batch_normalization')
 
-            x = leakyReLu(x, 0.2, name='conv2/leaky_relu')
-
+            x = leakyReLu(x, 0.2, name='conv2/leaky_relu') #28
+        
         name_net = 'x_layer_3'
         with tf.variable_scope(name_net):
             x = layers.conv2d(x,
-                                 filters=512,
+                                 filters=256,
                                  kernel_size=4,
                                  strides=2,
                                  padding='SAME',
@@ -259,7 +259,23 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
                                               training=is_training,
                                               name='conv3/batch_normalization')
 
-            x = leakyReLu(x, 0.2, name='conv3/leaky_relu')
+            x = leakyReLu(x, 0.2, name='conv3/leaky_relu') #14
+
+        name_net = 'x_layer_4'
+        with tf.variable_scope(name_net):
+            x = layers.conv2d(x,
+                                 filters=512,
+                                 kernel_size=7,
+                                 strides=2,
+                                 padding='VALID',
+                                 kernel_initializer=init_kernel,
+                                 name='conv4')
+
+            x = tf.layers.batch_normalization(x,
+                                              training=is_training,
+                                              name='conv4/batch_normalization')
+
+            x = leakyReLu(x, 0.2, name='conv4/leaky_relu') #4
         print("x before reshape size: ", x.get_shape())
         x = tf.reshape(x, [-1,1,1,512*4*4])
         print("x after reshape size: ", x.get_shape())
