@@ -177,6 +177,8 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
         intermediate_layer (tensor): intermediate layer for feature matching
     """
     layers = sn if do_spectral_norm else tf.layers
+    print("x_inp size: ", x_inp.get_shape())
+    print("z_inp size: ", z_inp.get_shape())
 
     with tf.variable_scope('discriminator_xz', reuse=reuse, custom_getter=getter):
         name_net = 'x_layer_1'
@@ -222,11 +224,13 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
                                               name='conv3/batch_normalization')
 
             x = leakyReLu(x, 0.2, name='conv3/leaky_relu')
-
+        
+        print("x before reshape size: ", x.get_shape())
         x = tf.reshape(x, [-1,1,1,512*4*4])
+        print("x after reshape size: ", x.get_shape())
 
         z = tf.reshape(z_inp, [-1, 1, 1, latent_dim])
-
+        print("z size: ", z.get_shape())
         name_net = 'z_layer_1'
         with tf.variable_scope(name_net):
             z = layers.conv2d(z,
@@ -252,8 +256,10 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
             z = leakyReLu(z)
             z = tf.layers.dropout(z, rate=0.2, training=is_training,
                                   name='dropout')
+        print("z after layers size: ", z.get_shape())
 
         y = tf.concat([x, z], axis=-1)
+        print("y before size: ", y.get_shape())
 
         name_net = 'y_layer_1'
         with tf.variable_scope(name_net):
@@ -269,6 +275,7 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
                                   name='dropout')
 
         intermediate_layer = y
+        print("intermediate layer size: ", intermediate_layer.get_shape())
 
         name_net = 'y_layer_2'
         with tf.variable_scope(name_net):
@@ -279,8 +286,10 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
                                  padding='SAME',
                                  kernel_initializer=init_kernel,
                                  name='conv')
-
+        print("y before final squeeze size: ", y.get_shape())
         logits = tf.squeeze(y)
+        print("logits final:  ", logits.get_shape())
+        
 
     return logits, intermediate_layer
 
