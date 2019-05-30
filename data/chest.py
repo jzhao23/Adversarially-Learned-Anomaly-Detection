@@ -6,8 +6,12 @@ import logging
 from utils.adapt_data import adapt_labels_outlier_task
 import numpy as np
 from sklearn.model_selection import train_test_split
+from chest_src import utils
 
 logger = logging.getLogger(__name__)
+
+#instead of label, there will be dataset 0  or dataset 1. dataset 0 will involve  the first  set of holdouts, dataset  1 the second.
+#  we will use hardcoded dictionaries to achieve this.
 
 def get_train(label=-1, centered=True, normalize=True):
     return _get_adapted_dataset("train", label, centered, normalize)
@@ -19,14 +23,15 @@ def get_valid(label=-1, centered=True, normalize=True):
     return _get_adapted_dataset("valid", label, centered, normalize)
 
 def get_shape_input():
-    return (None, 32, 32, 3)
+    return (None, 224, 224, 3)
 
 def get_shape_input_flatten():
-    return (None, 3072)
+    return (None, 150528)
 
-def get_anomalous_proportion():
-    return 0.9
+# abnormal_list = ["Lung", "Spine", "Pulmonary Atelectasis", "Cardiomegaly"] 0
+# abnormal_list = ["Calcinosis", "Opacity", "Thoracic Vertebrae", "Calcified Granuloma"] 1
 
+# figure out how this is used with the split and all!
 def _get_adapted_dataset(split, label, centered, normalize):
     """
     Gets the adapted dataset for the experiments
@@ -41,56 +46,62 @@ def _get_adapted_dataset(split, label, centered, normalize):
             :type label: object
     """
     dataset = {}
-    dataset['x_train'],  dataset['y_train'] = load(subset='train')
-    dataset['x_test'], dataset['y_test'] = load(subset='test')
 
-    def rescale(mat):
-        return np.transpose(mat, (3, 0, 1, 2))
-
-    dataset['x_train'] = rescale(dataset['x_train'])
-    dataset['x_test'] = rescale(dataset['x_test'])
+    if label == 0:
+        abnormal_list = ["Lung", "Spine", "Pulmonary Atelectasis", "Cardiomegaly"]
+    elif label == 1:
+        abnormal_list = ["Calcinosis", "Opacity", "Thoracic Vertebrae", "Calcified Granuloma"]
+    
+    dataset['x_train'], dataset['x_valid'], dataset['x_test'], dataset['y_train'], dataset['y_valid'], dataset['y_test'] = _load_holdout_dataset(abnormal_list)
 
     if normalize:
         dataset['x_train'] = dataset['x_train'].astype(np.float32) / 255.0
+        dataset['x_valid'] = dataset['x_valid'].astype(np.float32) / 255.0
         dataset['x_test'] = dataset['x_test'].astype(np.float32) / 255.0
     if centered:
         dataset['x_train'] = dataset['x_train'].astype(np.float32) * 2. - 1.
+        dataset['x_valid'] = dataset['x_valid'].astype(np.float32) * 2. - 1.
         dataset['x_test'] = dataset['x_test'].astype(np.float32) * 2. - 1.
-
-    full_x_data = np.concatenate([dataset['x_train'], dataset['x_test']], axis=0)
-    full_y_data = np.concatenate([dataset['y_train'], dataset['y_test']], axis=0)
-
-    #
-    dataset['x_train'], dataset['x_test'], \
-    dataset['y_train'], dataset['y_test'] = train_test_split(full_x_data,
-                                                             full_y_data,
-                                                             test_size=0.2,
-                                                             random_state=42)
-    
-    dataset['x_train'], dataset['x_valid'], \
-    dataset['y_train'], dataset['y_valid'] = train_test_split(dataset['x_train'],
-                                                             dataset['y_train'],
-                                                             test_size=0.25,
-                                                             random_state=42)
 
     key_img = 'x_' + split
     key_lbl = 'y_' + split
 
     if label != -1:
-
-        if split in ['train', 'valid']:
-
-            inliers = dataset[key_img][dataset[key_lbl] == label], \
-                      dataset[key_lbl][dataset[key_lbl] == label]
-            outliers = dataset[key_img][dataset[key_lbl] != label], \
-                       dataset[key_lbl][dataset[key_lbl] != label]
-
-            dataset[key_img], dataset[key_lbl] = inliers
-
-            dataset[key_lbl] = adapt_labels_outlier_task(dataset[key_lbl],
-                                                         label)
-        else:
-            dataset[key_lbl] = adapt_labels_outlier_task(dataset[key_lbl],
-                                                         label)
-
+        dataset[key_lbl] = adapt_labels_outlier_task(dataset[key_lbl],
+                                                         abnormal_list)
     return (dataset[key_img], dataset[key_lbl])
+
+def _load_holdout_dataset(abnormal_list=[]):
+    # load data
+    X, Y = utils.load_X_and_Y()
+    x_train, x_dev, x_test = X
+    y_train, y_dev, y_test = Y
+
+    # holdout training and dev data if requested
+    X_descr = utils.load_X_descr()
+    x_train_all_descr, x_dev_all_descr, _ = X_descr
+
+    holdout_x_train = []
+    holdout_y_train = []
+    for idx in range(len(x_train)):
+        if x_train_all_descr[idx] not in abnormal_list:
+            holdout_x_train.append(x_train[idx])
+            holdout_y_train.append(y_train[idx])
+
+    holdout_x_dev = []
+    holdout_y_dev = []
+    for idx in range(len(x_dev)):
+        if x_dev_all_descr[idx] not in abnormal_list:
+            holdout_x_dev.append(x_dev[idx])
+            holdout_y_dev.append(y_dev[idx])
+    
+    x_train = np.array(holdout_x_train).reshape((-1, 224, 224, 3))
+    y_train = np.array(holdout_y_train).reshape((-1, 1))
+
+    x_dev = np.array(holdout_x_dev).reshape((-1, 224, 224, 3))
+    y_dev = np.array(holdout_y_dev).reshape((-1, 1))
+
+    return (x_train, x_dev, x_test, y_train, y_dev, y_test)
+
+# abnormal_list = ["Lung", "Spine", "Pulmonary Atelectasis", "Cardiomegaly"] 0
+# abnormal_list = ["Calcinosis", "Opacity", "Thoracic Vertebrae", "Calcified Granuloma"] 1
