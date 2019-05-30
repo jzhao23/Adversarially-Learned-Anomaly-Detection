@@ -100,7 +100,11 @@ def _load_holdout_dataset(abnormal_list=[]):
     y_dev = np.array(holdout_y_dev).reshape((-1, 1))
     y_dev = np.array(np.zeros(y_dev.shape))
 
-    (y_test[x_test_descr in abnormal_list], y_test[x_test_descr not in abnormal_list]) = (1, 0)
+    for i in range(len(y_test)):
+        if x_test_descr[i] in abnormal_list:
+            y_test[i] = 1
+        else:
+            y_test[i] = 0
 
     return (x_train, x_dev, x_test, y_train, y_dev, y_test)
 
