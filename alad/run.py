@@ -550,6 +550,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
         print("scores l1 length:", len(scores_l1))
         print("scores l2 length:", len(scores_l2))
         print("scores fm length:", len(scores_fm))
+        print("testy length: ", len(testy))
         save_results(scores_ch, testy, model, dataset, 'ch',
                     'dzzenabled{}'.format(allow_zz), label, random_seed, step)
         save_results(scores_l1, testy, model, dataset, 'l1',
