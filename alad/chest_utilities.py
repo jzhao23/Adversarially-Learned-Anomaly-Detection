@@ -107,7 +107,7 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
         with tf.variable_scope(name_net):
             net = tf.layers.conv2d_transpose(net,
                                      filters=512,
-                                     kernel_size=4,
+                                     kernel_size=7,
                                      strides=2,
                                      padding='VALID',
                                      kernel_initializer=init_kernel,
@@ -148,8 +148,38 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
                                                 training=is_training,
                                                 name='tconv3/batch_normalization')
             net = tf.nn.relu(net, name='tconv3/relu')
-
+        
         name_net = 'layer_4'
+        with tf.variable_scope(name_net):
+            net = tf.layers.conv2d_transpose(net,
+                                     filters=128,
+                                     kernel_size=4,
+                                     strides=2,
+                                     padding='SAME',
+                                     kernel_initializer=init_kernel,
+                                     name='tconv4')
+
+            net = tf.layers.batch_normalization(net,
+                                                training=is_training,
+                                                name='tconv4/batch_normalization')
+            net = tf.nn.relu(net, name='tconv4/relu')
+
+        name_net = 'layer_5'
+        with tf.variable_scope(name_net):
+            net = tf.layers.conv2d_transpose(net,
+                                     filters=128,
+                                     kernel_size=4,
+                                     strides=2,
+                                     padding='SAME',
+                                     kernel_initializer=init_kernel,
+                                     name='tconv5')
+
+            net = tf.layers.batch_normalization(net,
+                                                training=is_training,
+                                                name='tconv5/batch_normalization')
+            net = tf.nn.relu(net, name='tconv5/relu')
+
+        name_net = 'layer_6'
         with tf.variable_scope(name_net):
             net = tf.layers.conv2d_transpose(net,
                                      filters=3,
@@ -157,11 +187,13 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
                                      strides=2,
                                      padding='SAME',
                                      kernel_initializer=init_kernel,
-                                     name='tconv4')
+                                     name='tconv6')
 
             print("size decoder: ", net)
             print("size decoder: ", net.get_shape())
-            net = tf.tanh(net, name='tconv4/tanh')
+            net = tf.tanh(net, name='tconv6/tanh')
+
+        
 
     return net
 
