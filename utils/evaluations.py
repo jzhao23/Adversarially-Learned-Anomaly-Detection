@@ -14,7 +14,7 @@ import seaborn as sns
 import pandas as pd
 import time
 import matplotlib.cm as cm
-from constants import IMAGES_DATASETS #utils.constants
+from utils.constants import IMAGES_DATASETS
 # import cv2
 sns.set(color_codes=True)
 
@@ -102,7 +102,6 @@ def do_hist(scores, true_labels, directory, dataset, random_seed, display=False)
         plt.savefig(directory + 'histogram_{}_{}.png'.format(random_seed, dataset),
                     transparent=True, bbox_inches='tight')
         plt.close()
-
 
 def do_hists(scores, true_labels, directory, dataset, random_seed, display=False):
     plt.figure()
