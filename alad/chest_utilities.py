@@ -85,6 +85,7 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
             print("size before squeeze encoder: ", net)
             print("size before squeeze encoder: ", net.get_shape())
             net = tf.squeeze(net, [1, 2])
+            print("size after squeeze  encoder: ", net.get_shape())
 
     return net
 
@@ -99,6 +100,7 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
     Returns:
         net (tensor): last activation layer of the generator
     """
+    print("z_inp of decoder size: ", z_inp.get_shape())
     with tf.variable_scope('generator', reuse=reuse, custom_getter=getter):
         net = tf.reshape(z_inp, [-1, 1, 1, latent_dim])
         name_net = 'layer_1'
@@ -303,7 +305,8 @@ def discriminator_xx(x, rec_x, is_training=False, getter=None, reuse=False,
     layers = sn if do_spectral_norm else tf.layers
 
     with tf.variable_scope('discriminator_xx', reuse=reuse, custom_getter=getter):
-
+        print("x: ", x.get_shape())
+        print("rec_x: ", rec_x.get_shape())
         net = tf.concat([x, rec_x], axis=1)
 
         name_net = 'layer_1'
