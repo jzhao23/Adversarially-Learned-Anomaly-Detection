@@ -15,7 +15,7 @@ def batch_fill(testx, batch_size):
     fill = np.ones(new_shape)
     return np.concatenate([testx[ran_from:ran_to], fill], axis=0), size
 
-def adapt_labels_outlier_task(true_labels, abnormal_list):
+def adapt_labels_outlier_task(true_labels, label): #abnormal_list
     """Adapt labels to anomaly detection context
 
     Args :
