@@ -82,8 +82,8 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
                                    padding='VALID',
                                    kernel_initializer=init_kernel,
                                    name='conv')
-            print("size before squeeze: ", net)
-            print(net.get_shape())
+            print("size before squeeze encoder: ", net)
+            print("size before squeeze encoder: ", net.get_shape())
             net = tf.squeeze(net, [1, 2])
 
     return net
@@ -157,6 +157,8 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
                                      kernel_initializer=init_kernel,
                                      name='tconv4')
 
+            print("size decoder: ", net)
+            print("size decoder: ", net.get_shape())
             net = tf.tanh(net, name='tconv4/tanh')
 
     return net
