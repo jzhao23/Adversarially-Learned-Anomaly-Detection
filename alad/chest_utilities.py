@@ -32,7 +32,7 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
     layers = sn if do_spectral_norm else tf.layers
 
     with tf.variable_scope('encoder', reuse=reuse, custom_getter=getter):
-        x_inp = tf.reshape(x_inp, [-1, 32, 32, 3])
+        x_inp = tf.reshape(x_inp, [-1, 224, 224, 3])
 
         name_net = 'layer_1'
         with tf.variable_scope(name_net):
