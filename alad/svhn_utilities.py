@@ -83,6 +83,7 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
                                    kernel_initializer=init_kernel,
                                    name='conv')
             print("size before squeeze: ", net)
+            print(net.get_shape())
             net = tf.squeeze(net, [1, 2])
 
     return net
