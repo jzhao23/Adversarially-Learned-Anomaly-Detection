@@ -9,7 +9,7 @@ import os
 from utils.adapt_data import batch_fill
 from utils.evaluations import save_results, heatmap
 from utils.constants import IMAGES_DATASETS
-FREQ_PRINT = 200 # print frequency image tensorboard [20]
+FREQ_PRINT = 20 # print frequency image tensorboard 
 FREQ_EV = 1
 PATIENCE = 10
 
