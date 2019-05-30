@@ -350,6 +350,8 @@ def train_and_test(dataset, nb_epochs, random_seed, label):
             scores_e += batch_score_e[:size]
             scores_r += batch_score_r[:size]
 
+        print("scores e length:", len(scores_e))
+        print("scores r length:", len(scores_r))
         save_results(scores_e, testy, 'dsebm', dataset, 'energy', "test", label,
                      random_seed, step)
         save_results(scores_r, testy, 'dsebm', dataset, 'reconstruction', "test",
