@@ -77,7 +77,7 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
         with tf.variable_scope(name_net):
             net = tf.layers.conv2d(net,
                                    latent_dim,
-                                   kernel_size=8,
+                                   kernel_size=4,
                                    strides=1,
                                    padding='VALID',
                                    kernel_initializer=init_kernel,
