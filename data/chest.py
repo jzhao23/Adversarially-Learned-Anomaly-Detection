@@ -213,21 +213,6 @@ def _load_holdout_dataset(abnormal_list=[]):
     print("average value of  test label: ", np.average(y_test))
     return (x_train, x_dev, x_test, y_train, y_dev, y_test)
 
-    """   X, Y = utils.load_X_and_Y()
-    x_train, x_dev, x_test = X
-    y_train, y_dev, y_test = Y
-
-    x_train = x_train[:100]
-    x_dev = x_train
-    x_test = x_train
-
-    y_train = y_train[:100]
-    y_dev = y_train
-    y_test = y_train
-
-    return (x_train, x_dev, x_test, y_train, y_dev, y_test)"""
-
-
 
 
 # abnormal_list = ["Lung", "Spine", "Pulmonary Atelectasis", "Cardiomegaly"] 0
