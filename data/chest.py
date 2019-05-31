@@ -168,9 +168,17 @@ def _load_holdout_dataset(abnormal_list=[]):
     y_train = np.array(include_y_train).reshape((-1, 1))
     y_train = np.array(np.zeros(y_train.shape))
 
+    holdout_x_train = np.array(holdout_x_train).reshape((-1, 224, 224, 3))
+    holdout_y_train = np.array(holdout_y_train).reshape((-1, 1))
+    holdout_y_train = np.array(np.ones(holdout_y_train.shape))
+
     x_dev = np.array(include_x_dev).reshape((-1, 224, 224, 3))
     y_dev = np.array(include_y_dev).reshape((-1, 1))
     y_dev = np.array(np.zeros(y_dev.shape))
+
+    holdout_x_dev = np.array(holdout_x_dev).reshape((-1, 224, 224, 3))
+    holdout_y_dev = np.array(holdout_y_dev).reshape((-1, 1))
+    holdout_y_dev = np.array(np.ones(holdout_y_dev.shape))
 
     # add excluded abnormalities (train/dev) to test set!
     for i in range(len(y_test)):
@@ -184,7 +192,7 @@ def _load_holdout_dataset(abnormal_list=[]):
 
     print("x_test after concatenate: ", x_test.shape[0])
     print("y_test after concatenate: ", y_test.shape[0])
-    print("these should be equal to: ", x_test.shape[0] + holdout_x_train.shape[0] + holdout_y_dev.shape[0])
+    print("these should be equal to: ", x_test.shape[0] + len(holdout_x_train) + len(holdout_x_dev))
 
     print("average value of  train label: ", np.average(y_train))
     print("average value of  dev label: ", np.average(y_dev))
