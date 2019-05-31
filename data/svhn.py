@@ -92,7 +92,7 @@ def _get_adapted_dataset(split, label, centered, normalize):
     print("temp y  after formatting0: ", temp_y)
 
     for y in range(len(temp_y)):
-        if y %  2 == 0:
+        if y % 2 == 0:
             temp_y[y] = 1
         else:
             temp_y[y] = 0
