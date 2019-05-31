@@ -112,7 +112,7 @@ def _load_holdout_dataset(abnormal_list=[]):
     print("average value of  test label: ", np.average(y_test))
     return (x_train, x_dev, x_test, y_train, y_dev, y_test)"""
 
-    """# load data
+    # load data
     X, Y = utils.load_X_and_Y()
     x_train, x_dev, x_test = X
     y_train, y_dev, y_test = Y
@@ -187,14 +187,23 @@ def _load_holdout_dataset(abnormal_list=[]):
         else:
             y_test[i] = 0
 
+    x_train = x_train[:100]
+    x_dev = x_train
+    x_test = x_train
+
+    y_train = y_train[:100]
+    y_dev = y_train
+    y_test = y_train
+
+
     print("holdout_x_train length after reshape: ", holdout_x_train.shape[0])
     print("holdout_x_dev length after reshape: ", holdout_x_dev.shape[0])
     print("x_test length after reshape: ", x_test.shape[0])
 
     print("goal: ", x_test.shape[0] + 2 * holdout_x_dev.shape[0] + 2 * holdout_x_train.shape[0])
 
-    x_test = np.concatenate((x_test, holdout_x_train, holdout_x_dev, holdout_x_train, holdout_x_dev))
-    y_test = np.concatenate((y_test, holdout_y_train, holdout_y_dev, holdout_y_train, holdout_y_dev))
+    #x_test = np.concatenate((x_test, holdout_x_train, holdout_x_dev, holdout_x_train, holdout_x_dev))
+    #y_test = np.concatenate((y_test, holdout_y_train, holdout_y_dev, holdout_y_train, holdout_y_dev))
 
     print("x_test after concatenate: ", x_test.shape[0])
     print("y_test after concatenate: ", y_test.shape[0])
@@ -202,9 +211,9 @@ def _load_holdout_dataset(abnormal_list=[]):
     print("average value of  train label: ", np.average(y_train))
     print("average value of  dev label: ", np.average(y_dev))
     print("average value of  test label: ", np.average(y_test))
-    return (x_train, x_dev, x_test, y_train, y_dev, y_test)"""
+    return (x_train, x_dev, x_test, y_train, y_dev, y_test)
 
-    X, Y = utils.load_X_and_Y()
+ """   X, Y = utils.load_X_and_Y()
     x_train, x_dev, x_test = X
     y_train, y_dev, y_test = Y
 
@@ -216,7 +225,7 @@ def _load_holdout_dataset(abnormal_list=[]):
     y_dev = y_train
     y_test = y_train
 
-    return (x_train, x_dev, x_test, y_train, y_dev, y_test)
+    return (x_train, x_dev, x_test, y_train, y_dev, y_test)"""
 
 
 
