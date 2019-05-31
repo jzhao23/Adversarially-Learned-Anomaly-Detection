@@ -208,11 +208,13 @@ def _load_holdout_dataset(abnormal_list=[]):
     x_train, x_dev, x_test = X
     y_train, y_dev, y_test = Y
 
-    x_train = x_train[100]
+    import pdb
+    pdb.set_trace()
+    x_train = x_train[:, 100]
     x_dev = x_train
     x_test = x_train
 
-    y_train = y_train[100]
+    y_train = y_train[:, 100]
     y_dev = y_train
     y_test = y_train
 
