@@ -116,15 +116,15 @@ def _get_adapted_dataset(split, label, centered, normalize):
                                                          label)""" # original
 
     # regardless of what dataset it is, take out outliers, and then adapt.
-    inliers = dataset[key_img][dataset[key_lbl] == label], \
+    """inliers = dataset[key_img][dataset[key_lbl] == label], \
                       dataset[key_lbl][dataset[key_lbl] == label]
     outliers = dataset[key_img][dataset[key_lbl] != label], \
                        dataset[key_lbl][dataset[key_lbl] != label]
 
-    dataset[key_img], dataset[key_lbl] = inliers
+    dataset[key_img], dataset[key_lbl] = inliers"""
 
     #dataset[key_lbl] = adapt_labels_outlier_task(dataset[key_lbl],
-                                                         #label)
+                                                         #glabel)
 
     print("average value of " + key_lbl + " : ", np.average(dataset[key_lbl]))
     return (dataset[key_img], dataset[key_lbl])
