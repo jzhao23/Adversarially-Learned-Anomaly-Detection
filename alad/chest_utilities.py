@@ -6,7 +6,7 @@ import tensorflow as tf
 from utils import sn
 
 learning_rate = 0.0002
-batch_size = 32
+batch_size = 16
 latent_dim = 50
 init_kernel = tf.random_normal_initializer(mean=0.0, stddev=0.01)
 
