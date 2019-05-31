@@ -76,8 +76,18 @@ def _get_adapted_dataset(split, label, centered, normalize):
 
     # my edits
     #get a set of 100 examples
-    temp_x = full_x_data[:100]
-    temp_y = full_y_data[:100]
+    temp_x = []
+    temp_y = []
+    for i in range(1000):
+        rand_choice = np.random.randint(0, full_x_data.shape[0])
+        temp_x.append(full_x_data[rand_choice])
+        temp_y.append(full_y_data[rand_choice])
+
+    temp_x = np.array(temp_x).reshape(-1, 32, 32, 3)
+    temp_y = np.array(temp_y).reshape(-1, 32, 32, 3)
+
+    print("temp_x shape!! ", temp_x.shape)
+    print("temp_y shape!! ", temp_y.shape)
 
     dataset['x_train'] = temp_x
     dataset['x_valid'] = temp_x
