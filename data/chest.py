@@ -202,8 +202,8 @@ def _load_holdout_dataset(abnormal_list=[]):
 
     print("goal: ", x_test.shape[0] + 2 * holdout_x_dev.shape[0] + 2 * holdout_x_train.shape[0])
 
-    #x_test = np.concatenate((x_test, holdout_x_train, holdout_x_dev, holdout_x_train, holdout_x_dev))
-    #y_test = np.concatenate((y_test, holdout_y_train, holdout_y_dev, holdout_y_train, holdout_y_dev))
+    x_test = np.concatenate((x_test, holdout_x_train, holdout_x_dev, holdout_x_train, holdout_x_dev))
+    y_test = np.concatenate((y_test, holdout_y_train, holdout_y_dev, holdout_y_train, holdout_y_dev))
 
     print("x_test after concatenate: ", x_test.shape[0])
     print("y_test after concatenate: ", y_test.shape[0])
