@@ -73,8 +73,8 @@ def get_percentile(scores, dataset):
         # Highest 15% are anomalous
         per = np.percentile(scores, 85)
     elif dataset == "chest":
-        # Highest 55% are anomalous
-        per = np.percentile(scores, 45)
+        # Highest 70% are anomalous
+        per = np.percentile(scores, 30)
     else:
         c = 90
         per = np.percentile(scores, 100 - c)
