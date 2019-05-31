@@ -117,6 +117,15 @@ def _load_holdout_dataset(abnormal_list=[]):
     x_train, x_dev, x_test = X
     y_train, y_dev, y_test = Y
 
+    print("len x train using shape[0]: ", x_train.shape[0])
+    print("len x  train using len: ", len(x_train))
+    print("len x dev: ", x_dev.shape[0])
+    print("len x test: ", x_test.shape[0])
+
+    print("len y train: ", y_train.shape[0])
+    print("len y dev: ", y_dev.shape[0])
+    print("len y test: ", y_test.shape[0])
+
     # holdout training and dev data if requested
     X_descr = utils.load_X_descr()
     x_train_all_descr, x_dev_all_descr, x_test_descr = X_descr
@@ -144,6 +153,16 @@ def _load_holdout_dataset(abnormal_list=[]):
         else:
             holdout_x_dev.append(x_dev[idx])
             holdout_y_dev.append(1)
+
+    print("len include  x train: ", len(include_x_train))
+    print("len include  x dev: ", len(include_x_dev))
+    print("len holdout  x train: ", len(holdout_x_train))
+    print("len holdout  x dev: ", len(holdout_x_dev))
+    print("len include  y train: ", len(include_y_train))
+    print("len include  y dev: ", len(include_y_dev))
+    print("len holdout  y train: ", len(holdout_y_train))
+    print("len holdout  y dev: ", len(holdout_y_dev))
+
     
     x_train = np.array(include_x_train).reshape((-1, 224, 224, 3))
     y_train = np.array(include_y_train).reshape((-1, 1))
@@ -160,8 +179,11 @@ def _load_holdout_dataset(abnormal_list=[]):
         else:
             y_test[i] = 0
 
-    x_test += holdout_x_train + holdout_x_dev
-    y_test += holdout_y_train + holdout_y_dev
+    x_test = np.concatenate((x_test, x_train, x_dev))
+    y_test = np.concatenate((y_test, y_train, y_dev))
+
+    print("x_test after concatenate: ", x_test.shape[0])
+    print("y_test after concatenate: ", y_test.shape[0])
 
     print("average value of  train label: ", np.average(y_train))
     print("average value of  dev label: ", np.average(y_dev))
