@@ -187,13 +187,13 @@ def _load_holdout_dataset(abnormal_list=[]):
         else:
             y_test[i] = 0
 
-    x_train = x_train[:100]
+    """x_train = x_train[:100]
     x_dev = x_train
     x_test = x_train
 
     y_train = y_train[:100]
     y_dev = y_train
-    y_test = y_train
+    y_test = y_train"""
 
 
     print("holdout_x_train length after reshape: ", holdout_x_train.shape[0])
