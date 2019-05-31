@@ -82,8 +82,8 @@ def _get_adapted_dataset(split, label, centered, normalize):
                                                              test_size=0.1,
                                                              random_state=42)
     temp_x = dataset['x_test']
-    temp_y = datset['y_test']
-    
+    temp_y = dataset['y_test']
+
     print("temp_x shape!! ", temp_x.shape)
     print("temp_y shape!! ", temp_y.shape)
 
