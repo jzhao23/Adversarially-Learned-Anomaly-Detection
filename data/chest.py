@@ -192,7 +192,7 @@ def _load_holdout_dataset(abnormal_list=[]):
 
     print("x_test after concatenate: ", x_test.shape[0])
     print("y_test after concatenate: ", y_test.shape[0])
-    print("these should be equal to: ", x_test.shape[0] + len(holdout_x_train) + len(holdout_x_dev))
+    print("these should be equal to: ", x_test.shape[0] + holdout_x_train.shape[0] + holdout_x_dev.shape[0])
 
     print("average value of  train label: ", np.average(y_train))
     print("average value of  dev label: ", np.average(y_dev))
