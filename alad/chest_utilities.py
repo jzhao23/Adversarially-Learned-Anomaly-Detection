@@ -38,7 +38,7 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
         with tf.variable_scope(name_net):
             net = layers.conv2d(x_inp,
                            128,
-                           kernel_size=10,
+                           kernel_size=4, #10
                            padding='SAME',
                            strides=2,
                            kernel_initializer=init_kernel,
@@ -51,7 +51,7 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
         with tf.variable_scope(name_net):
             net = layers.conv2d(net,
                            256,
-                            kernel_size=10,
+                            kernel_size=4, #10
                            padding='SAME',
                            strides=2,
                            kernel_initializer=init_kernel,
@@ -64,7 +64,7 @@ def encoder(x_inp, is_training=False, getter=None, reuse=False,
         with tf.variable_scope(name_net):
             net = layers.conv2d(net,
                            512,
-                            kernel_size=8,
+                            kernel_size=4, #8
                            padding='SAME',
                            strides=2,
                            kernel_initializer=init_kernel,
@@ -123,7 +123,7 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
         with tf.variable_scope(name_net):
             net = tf.layers.conv2d_transpose(net,
                                      filters=256,
-                                     kernel_size=10,
+                                     kernel_size=4, #10
                                      strides=2,
                                      padding='SAME',
                                      kernel_initializer=init_kernel,
@@ -138,7 +138,7 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
         with tf.variable_scope(name_net):
             net = tf.layers.conv2d_transpose(net,
                                      filters=128,
-                                     kernel_size=8,
+                                     kernel_size=4, #8
                                      strides=2,
                                      padding='SAME',
                                      kernel_initializer=init_kernel,
@@ -153,7 +153,7 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
         with tf.variable_scope(name_net):
             net = tf.layers.conv2d_transpose(net,
                                      filters=128,
-                                     kernel_size=8,
+                                     kernel_size=4, #8
                                      strides=2,
                                      padding='SAME',
                                      kernel_initializer=init_kernel,
@@ -168,7 +168,7 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
         with tf.variable_scope(name_net):
             net = tf.layers.conv2d_transpose(net,
                                      filters=128,
-                                     kernel_size=6,
+                                     kernel_size=4, #6
                                      strides=2,
                                      padding='SAME',
                                      kernel_initializer=init_kernel,
@@ -183,7 +183,7 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
         with tf.variable_scope(name_net):
             net = tf.layers.conv2d_transpose(net,
                                      filters=3,
-                                     kernel_size=6,
+                                     kernel_size=4, #6
                                      strides=2,
                                      padding='SAME',
                                      kernel_initializer=init_kernel,
@@ -221,7 +221,7 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
         with tf.variable_scope(name_net):
             x = layers.conv2d(x_inp, #224,224 
                                  filters=128,
-                                 kernel_size=10,
+                                 kernel_size=4, #10
                                  strides=4,
                                  padding='SAME',
                                  kernel_initializer=init_kernel,
@@ -233,7 +233,7 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
         with tf.variable_scope(name_net):
             x = layers.conv2d(x,
                                  filters=256,
-                                 kernel_size=10,
+                                 kernel_size=4, #10
                                  strides=2,
                                  padding='SAME',
                                  kernel_initializer=init_kernel,
@@ -249,7 +249,7 @@ def discriminator_xz(x_inp, z_inp, is_training=False, getter=None, reuse=False,
         with tf.variable_scope(name_net):
             x = layers.conv2d(x,
                                  filters=256,
-                                 kernel_size=10,
+                                 kernel_size=4, #10
                                  strides=2,
                                  padding='SAME',
                                  kernel_initializer=init_kernel,
@@ -366,7 +366,7 @@ def discriminator_xx(x, rec_x, is_training=False, getter=None, reuse=False,
         with tf.variable_scope(name_net):
             net = layers.conv2d(net,
                            filters=64,
-                           kernel_size=10,
+                           kernel_size=4, #10
                            strides=2,
                            padding='SAME',
                            kernel_initializer=init_kernel,
@@ -383,7 +383,7 @@ def discriminator_xx(x, rec_x, is_training=False, getter=None, reuse=False,
         with tf.variable_scope(name_net):
             net = layers.conv2d(net,
                            filters=128,
-                           kernel_size=10,
+                           kernel_size=4, #10
                            strides=2,
                            padding='SAME',
                            kernel_initializer=init_kernel,
