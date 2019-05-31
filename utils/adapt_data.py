@@ -15,7 +15,7 @@ def batch_fill(testx, batch_size):
     fill = np.ones(new_shape)
     return np.concatenate([testx[ran_from:ran_to], fill], axis=0), size
 
-#def adapt_labels_outlier_task(true_labels, label):
+def adapt_labels_outlier_task(true_labels, label):
     """Adapt labels to anomaly detection context
 
     Args :
@@ -24,15 +24,15 @@ def batch_fill(testx, batch_size):
     Returns :
             true_labels (list): list of labels, 1 for anomalous and 0 for normal
     """
-    """if label == 1:
+    if label == 1:
         (true_labels[true_labels == label], true_labels[true_labels != label]) = (1, 0)
         true_labels = [1] * true_labels.shape[0] - true_labels
     else:
         (true_labels[true_labels != label], true_labels[true_labels == label]) = (1, 0)
-    return true_labels"""
+    return true_labels
 
 
-def adapt_labels_outlier_task(true_labels, abnormal_list):
+#def adapt_labels_outlier_task(true_labels, abnormal_list):
     """Adapt labels to anomaly detection context
 
     Args :
@@ -41,8 +41,8 @@ def adapt_labels_outlier_task(true_labels, abnormal_list):
     Returns :
             true_labels (list): list of labels, 1 for anomalous and 0 for normal
     """
-    (true_labels[true_labels in abnormal_list], true_labels[true_labels not in abnormal_list]) = (1, 0)
-    return true_labels
+    """(true_labels[true_labels in abnormal_list], true_labels[true_labels not in abnormal_list]) = (1, 0)
+    return true_labels"""
 
 
 
