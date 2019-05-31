@@ -84,6 +84,8 @@ def _get_adapted_dataset(split, label, centered, normalize):
     temp_x = dataset['x_test']
     temp_y = dataset['y_test']
 
+    (temp_y[temp_y == 0 or temp_y == 2 or temp_y == 3 or temp_y == 4 or temp_y == 5], temp_y[temp_y == 1 or temp_y == 6 or temp_y == 7 or temp_y == 8 or temp_y == 9]) = (1, 0)
+
     print("temp_x shape!! ", temp_x.shape)
     print("temp_y shape!! ", temp_y.shape)
 
@@ -94,6 +96,7 @@ def _get_adapted_dataset(split, label, centered, normalize):
     dataset['y_train'] = temp_y
     dataset['y_valid'] = temp_y
     dataset['y_test'] = temp_y
+
 
     key_img = 'x_' + split
     key_lbl = 'y_' + split
