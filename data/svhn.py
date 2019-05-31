@@ -76,10 +76,12 @@ def _get_adapted_dataset(split, label, centered, normalize):
 
     # my edits
     #get a set of 100 examples
-    temp_x = full_x_data[0]
+    temp_x = full_x_data[0:1]
     temp_y = full_y_data[0]
     print("temp_x", temp_x)
     print("temp_x.shape", temp_x.shape)
+    print("temp_y", temp_y)
+    print("temp_y.shape", temp_y.shape)
     for i in range(1000):
         rand_choice = np.random.randint(0, full_x_data.shape[0])
         np.concatenate((temp_x, full_x_data[rand_choice]))
