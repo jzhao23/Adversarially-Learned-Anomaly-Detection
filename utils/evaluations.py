@@ -210,7 +210,15 @@ def save_results(scores, true_labels, model, dataset, method, weight, label,
     per = get_percentile(scores, dataset)    
     y_pred = (scores>=per)
     print("y_pred: ", y_pred)
-    
+    true = 0
+    false = 0
+    for pred in y_pred:
+        if y_pred:
+            true += 1
+        else:
+            false += 1
+    print("num true: ", true)
+    print("num false", false)
     precision, recall, f1, _ = precision_recall_fscore_support(true_labels.astype(int),
                                                                y_pred.astype(int),
                                                                average='binary')
