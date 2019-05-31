@@ -94,6 +94,7 @@ def _get_adapted_dataset(split, label, centered, normalize):
             dataset[key_lbl] = adapt_labels_outlier_task(dataset[key_lbl],
                                                          label)
 
+    print("average value of " + key_lbl + " : ", np.average(dataset[key_lbl]))
     return (dataset[key_img], dataset[key_lbl])
 
 def maybe_download(data_dir):
