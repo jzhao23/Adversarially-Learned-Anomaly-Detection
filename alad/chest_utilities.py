@@ -101,6 +101,7 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
         net (tensor): last activation layer of the generator
     """
     print("z_inp of decoder size: ", z_inp.get_shape())
+    #visualize inputs here
     with tf.variable_scope('generator', reuse=reuse, custom_getter=getter):
         net = tf.reshape(z_inp, [-1, 1, 1, latent_dim])
         name_net = 'layer_1'
@@ -192,6 +193,7 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
             print("size decoder: ", net)
             print("size decoder: ", net.get_shape())
             net = tf.tanh(net, name='tconv6/tanh')
+    #visualize outputs  here
 
         
 
