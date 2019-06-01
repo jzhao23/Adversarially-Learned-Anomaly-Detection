@@ -74,7 +74,7 @@ def get_percentile(scores, dataset):
         per = np.percentile(scores, 85)
     elif dataset == "chest":
         # Highest 70% are anomalous
-        per = np.percentile(scores, 30)
+        per = np.percentile(scores, 50)
     else:
         c = 90
         per = np.percentile(scores, 100 - c)
@@ -213,7 +213,7 @@ def save_results(scores, true_labels, model, dataset, method, weight, label,
     true = 0
     false = 0
     for pred in y_pred:
-        if y_pred:
+        if pred:
             true += 1
         else:
             false += 1
