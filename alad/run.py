@@ -505,9 +505,11 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
         scores_fm = []
         inference_time = []
 
+        print("before creating scores!!")
         # Create scores
         for t in range(nr_batches_test):
 
+            print("before creating minibatches!!")
             # construct randomly permuted minibatches
             ran_from = t * batch_size
             ran_to = (t + 1) * batch_size
@@ -516,12 +518,21 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
             feed_dict = {x_pl: testx[ran_from:ran_to],
                         z_pl: np.random.normal(size=[batch_size, latent_dim]),
                         is_training_pl:False}
-
+            print("before creating running scores!!")
             scores_ch += sess.run(score_ch, feed_dict=feed_dict).tolist()
+            print("scores_ch: ", scores_ch)
+            print("scores_ch average: ", tf.metrics.mean(scores_ch))
             scores_l1 += sess.run(score_l1, feed_dict=feed_dict).tolist()
+            print("scores_l1: ", scores_ch)
+            print("scores_l1 average: ", tf.metrics.mean(scores_l1))
             scores_l2 += sess.run(score_l2, feed_dict=feed_dict).tolist()
+            print("scores_l2: ", scores_l2)
+            print("scores_l2 average: ", tf.metrics.mean(scores_l2))
             scores_fm += sess.run(score_fm, feed_dict=feed_dict).tolist()
+            print("scores_fm: ", scores_ch)
+            print("scores_fm average: ", tf.metrics.mean(scores_fm))
             inference_time.append(time.time() - begin_test_time_batch)
+            print("after running scores!!")
 
 
         inference_time = np.mean(inference_time)
