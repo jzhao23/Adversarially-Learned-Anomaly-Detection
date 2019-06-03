@@ -62,7 +62,7 @@ def _get_adapted_dataset(split, label, centered, normalize):
     full_y_data = np.concatenate([dataset['y_train'], dataset['y_test']], axis=0)
 
     #
-    """dataset['x_train'], dataset['x_test'], \
+    dataset['x_train'], dataset['x_test'], \
     dataset['y_train'], dataset['y_test'] = train_test_split(full_x_data,
                                                              full_y_data,
                                                              test_size=0.2,
@@ -72,11 +72,11 @@ def _get_adapted_dataset(split, label, centered, normalize):
     dataset['y_train'], dataset['y_valid'] = train_test_split(dataset['x_train'],
                                                              dataset['y_train'],
                                                              test_size=0.25,
-                                                             random_state=42)""" # original
+                                                             random_state=42) # original
 
     # my edits
     #get a set of 100 examples
-    dataset['x_train'], dataset['x_test'], \
+    """dataset['x_train'], dataset['x_test'], \
     dataset['y_train'], dataset['y_test'] = train_test_split(full_x_data,
                                                              full_y_data,
                                                              test_size=0.1,
@@ -107,13 +107,13 @@ def _get_adapted_dataset(split, label, centered, normalize):
 
     dataset['y_train'] = temp_y
     dataset['y_valid'] = temp_y
-    dataset['y_test'] = temp_y
+    dataset['y_test'] = temp_y"""
 
 
     key_img = 'x_' + split
     key_lbl = 'y_' + split
 
-    """if label != -1:
+    if label != -1:
 
         if split in ['train', 'valid']:
 
@@ -128,7 +128,7 @@ def _get_adapted_dataset(split, label, centered, normalize):
                                                          label)
         else:
             dataset[key_lbl] = adapt_labels_outlier_task(dataset[key_lbl],
-                                                         label)""" # original
+                                                         label) # original
 
     # regardless of what dataset it is, take out outliers, and then adapt.
     """inliers = dataset[key_img][dataset[key_lbl] == label], \
@@ -141,7 +141,7 @@ def _get_adapted_dataset(split, label, centered, normalize):
     #dataset[key_lbl] = adapt_labels_outlier_task(dataset[key_lbl],
                                                          #glabel)
 
-    print("average value of " + key_lbl + " : ", np.average(dataset[key_lbl]))
+    #print("average value of " + key_lbl + " : ", np.average(dataset[key_lbl]))
     return (dataset[key_img], dataset[key_lbl])
 
 def maybe_download(data_dir):

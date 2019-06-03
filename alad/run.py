@@ -520,7 +520,7 @@ def train_and_test(dataset, nb_epochs, degree, random_seed, label,
                         is_training_pl:False}
             print("before creating running scores!!")
             scores_ch += sess.run(score_ch, feed_dict=feed_dict).tolist()
-            print("scores_ch: ", scores_ch)
+            print("scores_ch: ", scores_chg)
             print("scores_ch average: ", np.average(scores_ch))
             print("scores_ch max: ", np.amax(scores_ch))
             scores_l1 += sess.run(score_l1, feed_dict=feed_dict).tolist()
